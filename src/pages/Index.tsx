@@ -14,6 +14,7 @@ import "@xyflow/react/dist/style.css";
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
 import SequenceNode from "@/components/FlowEditor/SequenceNode";
+import { useToast } from "@/components/ui/use-toast";
 
 const nodeTypes = {
   audience: AudienceNode,
@@ -36,6 +37,7 @@ const initialNodes = [
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { toast } = useToast();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -82,7 +84,76 @@ const Index = () => {
         animated: true,
       },
     ]);
+
+    // Add message nodes for each segment
+    const maleMessageNode = {
+      id: `${nodeId}-male-message`,
+      type: "message",
+      position: { x: maleNode.position.x, y: maleNode.position.y + 200 },
+      data: {
+        content: "",
+        onChange: (content: string) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === `${nodeId}-male-message`
+                ? { ...n, data: { ...n.data, content } }
+                : n
+            )
+          );
+        },
+        onDelete: () => handleDeleteBranch(`${nodeId}-male`),
+      },
+    };
+
+    const femaleMessageNode = {
+      id: `${nodeId}-female-message`,
+      type: "message",
+      position: { x: femaleNode.position.x, y: femaleNode.position.y + 200 },
+      data: {
+        content: "",
+        onChange: (content: string) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === `${nodeId}-female-message`
+                ? { ...n, data: { ...n.data, content } }
+                : n
+            )
+          );
+        },
+        onDelete: () => handleDeleteBranch(`${nodeId}-female`),
+      },
+    };
+
+    setNodes((nds) => [...nds, maleMessageNode, femaleMessageNode]);
+    setEdges((eds) => [
+      ...eds,
+      {
+        id: `${nodeId}-male-message-edge`,
+        source: `${nodeId}-male`,
+        target: `${nodeId}-male-message`,
+        animated: true,
+      },
+      {
+        id: `${nodeId}-female-message-edge`,
+        source: `${nodeId}-female`,
+        target: `${nodeId}-female-message`,
+        animated: true,
+      },
+    ]);
   }, [nodes, setNodes, setEdges]);
+
+  const handleDeleteBranch = useCallback((branchId: string) => {
+    // Delete all nodes and edges connected to this branch
+    setNodes((nds) => nds.filter((n) => !n.id.startsWith(branchId)));
+    setEdges((eds) => eds.filter((e) => 
+      !e.source.startsWith(branchId) && !e.target.startsWith(branchId)
+    ));
+
+    toast({
+      title: "Branch Deleted",
+      description: "The selected branch and its connected nodes have been removed.",
+    });
+  }, [setNodes, setEdges, toast]);
 
   // Update nodes with segmentation handler
   const nodesWithHandlers = nodes.map((node) => {
