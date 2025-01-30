@@ -52,7 +52,13 @@ const AREA_CODES = ["415", "628", "510"];
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
+  const [selectedAreaCode, setSelectedAreaCode] = useState(AREA_CODES[0]);
   const { toast } = useToast();
+
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
 
   const handleAudienceChange = useCallback((nodeId: string, audienceId: string) => {
     setNodes((nds) =>
@@ -88,10 +94,10 @@ const Index = () => {
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === nodeId) {
-          const selectedTags = node.data.selectedTags || [];
-          const newSelectedTags = selectedTags.includes(tagId)
-            ? selectedTags.filter((id) => id !== tagId)
-            : [...selectedTags, tagId];
+          const currentTags = node.data.selectedTags as string[] || [];
+          const newSelectedTags = currentTags.includes(tagId)
+            ? currentTags.filter((id) => id !== tagId)
+            : [...currentTags, tagId];
           
           return {
             ...node,
@@ -105,6 +111,82 @@ const Index = () => {
       })
     );
   }, [setNodes]);
+
+  const createMessageNode = useCallback((sourceId: string) => {
+    const newNode: CustomNode = {
+      id: `message-${Date.now()}`,
+      type: 'message',
+      position: { x: nodes.find(n => n.id === sourceId)?.position.x || 0, y: (nodes.find(n => n.id === sourceId)?.position.y || 0) + 150 },
+      data: {
+        content: '',
+        onChange: (content: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `message-${Date.now()}` 
+                ? { ...node, data: { ...node.data, content } }
+                : node
+            )
+          );
+        },
+      },
+    };
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+    }]);
+  }, [nodes, setNodes, setEdges]);
+
+  const createPollNode = useCallback((sourceId: string) => {
+    const newNode: CustomNode = {
+      id: `poll-${Date.now()}`,
+      type: 'poll',
+      position: { x: nodes.find(n => n.id === sourceId)?.position.x || 0, y: (nodes.find(n => n.id === sourceId)?.position.y || 0) + 150 },
+      data: {
+        question: '',
+        options: [],
+        onQuestionChange: (question: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, question } }
+                : node
+            )
+          );
+        },
+        onOptionsChange: (options: any[]) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, options } }
+                : node
+            )
+          );
+        },
+      },
+    };
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+    }]);
+  }, [nodes, setNodes, setEdges]);
+
+  const handlePreview = () => {
+    toast({
+      title: "Preview Mode",
+      description: "Preview functionality will be implemented here",
+    });
+  };
+
+  const handleSubmit = () => {
+    toast({
+      title: "Flow Submitted",
+      description: "Your flow has been submitted successfully",
+    });
+  };
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
@@ -148,7 +230,7 @@ const Index = () => {
         <Panel position="top-left" className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold text-black mb-1">Campaign Flow</h2>
           <p className="text-sm text-gray-600">
-            Saved at {format(new Date(), "'at' p zzz 'on' PPP")}
+            Saved at {format(new Date(), "p 'on' PP")}
           </p>
         </Panel>
         <Panel position="top-right" className="flex gap-2">

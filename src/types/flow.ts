@@ -32,15 +32,17 @@ export interface SequenceNodeData extends Record<string, unknown> {
   delay: string;
 }
 
+export interface PollOption {
+  id: string;
+  text: string;
+  leadsTo: 'next' | 'complete';
+}
+
 export interface PollNodeData extends Record<string, unknown> {
   question: string;
-  options: Array<{
-    id: string;
-    text: string;
-    leadsTo?: 'next' | 'complete';
-  }>;
+  options: PollOption[];
   onQuestionChange: (question: string) => void;
-  onOptionsChange: (options: any[]) => void;
+  onOptionsChange: (options: PollOption[]) => void;
   onDelete?: () => void;
 }
 
