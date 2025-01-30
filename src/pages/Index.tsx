@@ -129,7 +129,6 @@ const Index = () => {
 
     setNodes((nds) => [...nds, maleNode, femaleNode, maleMessageNode, femaleMessageNode]);
     setEdges((eds) => [
-      ...eds,
       { 
         id: `${nodeId}-male-edge`,
         source: nodeId,
@@ -208,7 +207,7 @@ const Index = () => {
         <Panel position="top-left" className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold text-black mb-1">Campaign Flow</h2>
           <p className="text-sm text-gray-600">
-            Scheduled for {format(new Date(), "PPP 'at' p zzz")}
+            Saved at {format(new Date(), "'at' p zzz 'on' PPP")}
           </p>
         </Panel>
         <Panel position="top-right" className="flex gap-2">
