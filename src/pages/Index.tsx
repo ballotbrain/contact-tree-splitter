@@ -16,6 +16,7 @@ import { Eye, Send } from "lucide-react";
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
 import SequenceNode from "@/components/FlowEditor/SequenceNode";
+import PollNode from "@/components/FlowEditor/PollNode";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomNode, CustomEdge } from "@/types/flow";
@@ -24,7 +25,14 @@ const nodeTypes = {
   audience: AudienceNode,
   message: MessageNode,
   sequence: SequenceNode,
+  poll: PollNode,
 };
+
+const mockTags = [
+  { id: "1", name: "VIP" },
+  { id: "2", name: "New Customer" },
+  { id: "3", name: "Inactive" },
+];
 
 const initialNodes: CustomNode[] = [
   {
@@ -34,6 +42,8 @@ const initialNodes: CustomNode[] = [
     data: { 
       label: "All Contacts",
       contacts: 100,
+      tags: mockTags,
+      selectedTags: [],
     },
   },
 ];
@@ -65,108 +75,111 @@ const Index = () => {
     });
   }, [toast]);
 
-  const handleSegment = useCallback((nodeId: string) => {
-    const node = nodes.find((n) => n.id === nodeId);
-    if (!node) return;
+  const handleTagSelect = useCallback((nodeId: string, tagId: string) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const selectedTags = node.data.selectedTags || [];
+          const newSelectedTags = selectedTags.includes(tagId)
+            ? selectedTags.filter((id) => id !== tagId)
+            : [...selectedTags, tagId];
+          
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              selectedTags: newSelectedTags,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [setNodes]);
 
-    const maleNode: CustomNode = {
-      id: `${nodeId}-male`,
-      type: "audience",
-      position: { x: node.position.x - 200, y: node.position.y + 200 },
-      data: { 
-        label: "Male Contacts",
-        contacts: Math.floor((node.data as any).contacts * 0.6),
-      },
-    };
+  const createMessageNode = useCallback((sourceNodeId: string) => {
+    const sourceNode = nodes.find((n) => n.id === sourceNodeId);
+    if (!sourceNode) return;
 
-    const femaleNode: CustomNode = {
-      id: `${nodeId}-female`,
-      type: "audience",
-      position: { x: node.position.x + 200, y: node.position.y + 200 },
-      data: { 
-        label: "Female Contacts",
-        contacts: Math.floor((node.data as any).contacts * 0.4),
-      },
-    };
-
-    const maleMessageNode: CustomNode = {
-      id: `${nodeId}-male-message`,
+    const messageNode: CustomNode = {
+      id: `message-${Date.now()}`,
       type: "message",
-      position: { x: maleNode.position.x, y: maleNode.position.y + 200 },
+      position: {
+        x: sourceNode.position.x,
+        y: sourceNode.position.y + 200,
+      },
       data: {
         content: "",
         onChange: (content: string) => {
           setNodes((nds) =>
             nds.map((n) =>
-              n.id === `${nodeId}-male-message`
+              n.id === `message-${Date.now()}`
                 ? { ...n, data: { ...n.data, content } }
                 : n
             )
           );
         },
-        onDelete: () => handleDeleteBranch(`${nodeId}-male`),
       },
     };
 
-    const femaleMessageNode: CustomNode = {
-      id: `${nodeId}-female-message`,
-      type: "message",
-      position: { x: femaleNode.position.x, y: femaleNode.position.y + 200 },
-      data: {
-        content: "",
-        onChange: (content: string) => {
-          setNodes((nds) =>
-            nds.map((n) =>
-              n.id === `${nodeId}-female-message`
-                ? { ...n, data: { ...n.data, content } }
-                : n
-            )
-          );
-        },
-        onDelete: () => handleDeleteBranch(`${nodeId}-female`),
-      },
-    };
-
-    setNodes((nds) => [...nds, maleNode, femaleNode, maleMessageNode, femaleMessageNode]);
+    setNodes((nds) => [...nds, messageNode]);
     setEdges((eds) => [
-      { 
-        id: `${nodeId}-male-edge`,
-        source: nodeId,
-        target: `${nodeId}-male`,
-        animated: true,
-      },
+      ...eds,
       {
-        id: `${nodeId}-female-edge`,
-        source: nodeId,
-        target: `${nodeId}-female`,
-        animated: true,
-      },
-      {
-        id: `${nodeId}-male-message-edge`,
-        source: `${nodeId}-male`,
-        target: `${nodeId}-male-message`,
-        animated: true,
-      },
-      {
-        id: `${nodeId}-female-message-edge`,
-        source: `${nodeId}-female`,
-        target: `${nodeId}-female-message`,
+        id: `edge-${sourceNodeId}-${messageNode.id}`,
+        source: sourceNodeId,
+        target: messageNode.id,
         animated: true,
       },
     ]);
   }, [nodes, setNodes, setEdges]);
 
-  const handleDeleteBranch = useCallback((branchId: string) => {
-    setNodes((nds) => nds.filter((n) => !n.id.startsWith(branchId)));
-    setEdges((eds) => eds.filter((e) => 
-      !e.source.startsWith(branchId) && !e.target.startsWith(branchId)
-    ));
+  const createPollNode = useCallback((sourceNodeId: string) => {
+    const sourceNode = nodes.find((n) => n.id === sourceNodeId);
+    if (!sourceNode) return;
 
-    toast({
-      title: "Branch Deleted",
-      description: "The selected branch and its connected nodes have been removed.",
-    });
-  }, [setNodes, setEdges, toast]);
+    const pollNode: CustomNode = {
+      id: `poll-${Date.now()}`,
+      type: "poll",
+      position: {
+        x: sourceNode.position.x,
+        y: sourceNode.position.y + 200,
+      },
+      data: {
+        question: "",
+        options: [],
+        onQuestionChange: (question: string) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === `poll-${Date.now()}`
+                ? { ...n, data: { ...n.data, question } }
+                : n
+            )
+          );
+        },
+        onOptionsChange: (options: any[]) => {
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.id === `poll-${Date.now()}`
+                ? { ...n, data: { ...n.data, options } }
+                : n
+            )
+          );
+        },
+      },
+    };
+
+    setNodes((nds) => [...nds, pollNode]);
+    setEdges((eds) => [
+      ...eds,
+      {
+        id: `edge-${sourceNodeId}-${pollNode.id}`,
+        source: sourceNodeId,
+        target: pollNode.id,
+        animated: true,
+      },
+    ]);
+  }, [nodes, setNodes, setEdges]);
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
@@ -174,7 +187,9 @@ const Index = () => {
         ...node,
         data: {
           ...node.data,
-          onSegment: () => handleSegment(node.id),
+          onTagSelect: (tagId: string) => handleTagSelect(node.id, tagId),
+          onMessageCreate: () => createMessageNode(node.id),
+          onPollCreate: () => createPollNode(node.id),
         },
       };
     }
