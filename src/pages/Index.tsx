@@ -15,6 +15,7 @@ import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
 import SequenceNode from "@/components/FlowEditor/SequenceNode";
 import { useToast } from "@/components/ui/use-toast";
+import { CustomNode, CustomEdge } from "@/types/flow";
 
 const nodeTypes = {
   audience: AudienceNode,
@@ -22,7 +23,7 @@ const nodeTypes = {
   sequence: SequenceNode,
 };
 
-const initialNodes = [
+const initialNodes: CustomNode[] = [
   {
     id: "1",
     type: "audience",
@@ -35,8 +36,8 @@ const initialNodes = [
 ];
 
 const Index = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
   const { toast } = useToast();
 
   const onConnect = useCallback(
@@ -48,45 +49,27 @@ const Index = () => {
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
 
-    const maleNode = {
+    const maleNode: CustomNode = {
       id: `${nodeId}-male`,
       type: "audience",
       position: { x: node.position.x - 200, y: node.position.y + 200 },
       data: { 
         label: "Male Contacts",
-        contacts: Math.floor(node.data.contacts * 0.6),
+        contacts: Math.floor((node.data as any).contacts * 0.6),
       },
     };
 
-    const femaleNode = {
+    const femaleNode: CustomNode = {
       id: `${nodeId}-female`,
       type: "audience",
       position: { x: node.position.x + 200, y: node.position.y + 200 },
       data: { 
         label: "Female Contacts",
-        contacts: Math.floor(node.data.contacts * 0.4),
+        contacts: Math.floor((node.data as any).contacts * 0.4),
       },
     };
 
-    setNodes((nds) => [...nds, maleNode, femaleNode]);
-    setEdges((eds) => [
-      ...eds,
-      { 
-        id: `${nodeId}-male-edge`,
-        source: nodeId,
-        target: `${nodeId}-male`,
-        animated: true,
-      },
-      {
-        id: `${nodeId}-female-edge`,
-        source: nodeId,
-        target: `${nodeId}-female`,
-        animated: true,
-      },
-    ]);
-
-    // Add message nodes for each segment
-    const maleMessageNode = {
+    const maleMessageNode: CustomNode = {
       id: `${nodeId}-male-message`,
       type: "message",
       position: { x: maleNode.position.x, y: maleNode.position.y + 200 },
@@ -105,7 +88,7 @@ const Index = () => {
       },
     };
 
-    const femaleMessageNode = {
+    const femaleMessageNode: CustomNode = {
       id: `${nodeId}-female-message`,
       type: "message",
       position: { x: femaleNode.position.x, y: femaleNode.position.y + 200 },
@@ -124,9 +107,21 @@ const Index = () => {
       },
     };
 
-    setNodes((nds) => [...nds, maleMessageNode, femaleMessageNode]);
+    setNodes((nds) => [...nds, maleNode, femaleNode, maleMessageNode, femaleMessageNode]);
     setEdges((eds) => [
       ...eds,
+      { 
+        id: `${nodeId}-male-edge`,
+        source: nodeId,
+        target: `${nodeId}-male`,
+        animated: true,
+      },
+      {
+        id: `${nodeId}-female-edge`,
+        source: nodeId,
+        target: `${nodeId}-female`,
+        animated: true,
+      },
       {
         id: `${nodeId}-male-message-edge`,
         source: `${nodeId}-male`,
@@ -143,7 +138,6 @@ const Index = () => {
   }, [nodes, setNodes, setEdges]);
 
   const handleDeleteBranch = useCallback((branchId: string) => {
-    // Delete all nodes and edges connected to this branch
     setNodes((nds) => nds.filter((n) => !n.id.startsWith(branchId)));
     setEdges((eds) => eds.filter((e) => 
       !e.source.startsWith(branchId) && !e.target.startsWith(branchId)
@@ -155,7 +149,6 @@ const Index = () => {
     });
   }, [setNodes, setEdges, toast]);
 
-  // Update nodes with segmentation handler
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
       return {
