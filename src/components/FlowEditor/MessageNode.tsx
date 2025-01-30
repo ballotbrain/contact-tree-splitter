@@ -30,10 +30,14 @@ interface MessageNodeProps {
     content: string;
     onChange: (content: string) => void;
     onDelete?: () => void;
+    areaCode?: string;
+    onAreaCodeChange?: (code: string) => void;
   };
 }
 
 const MAX_CHARS = 2000;
+
+const AREA_CODES = ["415", "628", "510"];
 
 const MessageNode = ({ data }: MessageNodeProps) => {
   const [links, setLinks] = useState<string[]>([]);
@@ -75,22 +79,35 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 min-w-[300px]">
+    <div className="bg-white rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-blue-600" />
-          <span className="font-medium text-gray-900">Message</span>
+          <MessageSquare className="w-4 h-4 text-gray-600" />
+          <span className="font-medium text-black">Message</span>
         </div>
-        {data.onDelete && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={data.onDelete}
-            className="h-8 w-8 text-red-500 hover:text-red-700"
+        <div className="flex items-center gap-2">
+          <select
+            value={data.areaCode}
+            onChange={(e) => data.onAreaCodeChange?.(e.target.value)}
+            className="text-sm border border-gray-200 rounded px-2 py-1 bg-white text-black"
           >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
+            {AREA_CODES.map((code) => (
+              <option key={code} value={code}>
+                ({code})
+              </option>
+            ))}
+          </select>
+          {data.onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={data.onDelete}
+              className="h-8 w-8 text-gray-500 hover:text-gray-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
       
       <div className="space-y-3">

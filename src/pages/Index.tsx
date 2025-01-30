@@ -10,10 +10,13 @@ import {
   Connection,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { format } from "date-fns";
+import { Eye, Send } from "lucide-react";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
 import SequenceNode from "@/components/FlowEditor/SequenceNode";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomNode, CustomEdge } from "@/types/flow";
 
@@ -35,15 +38,32 @@ const initialNodes: CustomNode[] = [
   },
 ];
 
+const AREA_CODES = ["415", "628", "510"];
+
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
   const { toast } = useToast();
+  const [selectedAreaCode, setSelectedAreaCode] = useState(AREA_CODES[0]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
+
+  const handlePreview = useCallback(() => {
+    toast({
+      title: "Preview Mode",
+      description: "Preview functionality will be implemented here",
+    });
+  }, [toast]);
+
+  const handleSubmit = useCallback(() => {
+    toast({
+      title: "Flow Submitted",
+      description: "Your message flow has been submitted successfully",
+    });
+  }, [toast]);
 
   const handleSegment = useCallback((nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
@@ -159,11 +179,21 @@ const Index = () => {
         },
       };
     }
+    if (node.type === "message") {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          areaCode: selectedAreaCode,
+          onAreaCodeChange: setSelectedAreaCode,
+        },
+      };
+    }
     return node;
   });
 
   return (
-    <div className="w-full h-screen bg-slate-50">
+    <div className="w-full h-screen bg-white">
       <ReactFlow
         nodes={nodesWithHandlers}
         edges={edges}
@@ -176,10 +206,27 @@ const Index = () => {
         <Background />
         <Controls />
         <Panel position="top-left" className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold mb-2">Flow Builder</h2>
+          <h2 className="text-xl font-semibold text-black mb-1">Campaign Flow</h2>
           <p className="text-sm text-gray-600">
-            Build your message flow by connecting nodes
+            Scheduled for {format(new Date(), "PPP 'at' p zzz")}
           </p>
+        </Panel>
+        <Panel position="top-right" className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handlePreview}
+            className="bg-white text-black border-gray-200 hover:bg-gray-50"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Preview
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            className="bg-black text-white hover:bg-gray-900"
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Submit
+          </Button>
         </Panel>
       </ReactFlow>
     </div>

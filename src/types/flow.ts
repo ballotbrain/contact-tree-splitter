@@ -1,18 +1,20 @@
 import { Node, Edge } from "@xyflow/react";
 
-export interface AudienceNodeData {
+export interface AudienceNodeData extends Record<string, unknown> {
   label: string;
   contacts: number;
   onSegment?: () => void;
 }
 
-export interface MessageNodeData {
+export interface MessageNodeData extends Record<string, unknown> {
   content: string;
   onChange: (content: string) => void;
   onDelete?: () => void;
+  areaCode?: string;
+  onAreaCodeChange?: (code: string) => void;
 }
 
-export interface SequenceNodeData {
+export interface SequenceNodeData extends Record<string, unknown> {
   label: string;
   delay: string;
 }
