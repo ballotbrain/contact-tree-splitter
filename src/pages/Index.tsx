@@ -42,7 +42,6 @@ const initialNodes: CustomNode[] = [
     data: { 
       label: "All Contacts",
       contacts: 100,
-      tags: mockTags,
       selectedTags: [],
     },
   },
@@ -54,26 +53,36 @@ const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
   const { toast } = useToast();
-  const [selectedAreaCode, setSelectedAreaCode] = useState(AREA_CODES[0]);
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
+  const handleAudienceChange = useCallback((nodeId: string, audienceId: string) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const audienceMap: Record<string, { label: string; contacts: number }> = {
+            csv1: { label: "CSV Import 1", contacts: 150 },
+            csv2: { label: "CSV Import 2", contacts: 200 },
+            csv3: { label: "CSV Import 3", contacts: 300 },
+            csv4: { label: "CSV Import 4", contacts: 250 },
+          };
 
-  const handlePreview = useCallback(() => {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: audienceMap[audienceId].label,
+              contacts: audienceMap[audienceId].contacts,
+            },
+          };
+        }
+        return node;
+      })
+    );
+
     toast({
-      title: "Preview Mode",
-      description: "Preview functionality will be implemented here",
+      title: "Audience Updated",
+      description: "The audience segment has been updated successfully.",
     });
-  }, [toast]);
-
-  const handleSubmit = useCallback(() => {
-    toast({
-      title: "Flow Submitted",
-      description: "Your message flow has been submitted successfully",
-    });
-  }, [toast]);
+  }, [setNodes, toast]);
 
   const handleTagSelect = useCallback((nodeId: string, tagId: string) => {
     setNodes((nds) =>
@@ -97,90 +106,6 @@ const Index = () => {
     );
   }, [setNodes]);
 
-  const createMessageNode = useCallback((sourceNodeId: string) => {
-    const sourceNode = nodes.find((n) => n.id === sourceNodeId);
-    if (!sourceNode) return;
-
-    const messageNode: CustomNode = {
-      id: `message-${Date.now()}`,
-      type: "message",
-      position: {
-        x: sourceNode.position.x,
-        y: sourceNode.position.y + 200,
-      },
-      data: {
-        content: "",
-        onChange: (content: string) => {
-          setNodes((nds) =>
-            nds.map((n) =>
-              n.id === `message-${Date.now()}`
-                ? { ...n, data: { ...n.data, content } }
-                : n
-            )
-          );
-        },
-      },
-    };
-
-    setNodes((nds) => [...nds, messageNode]);
-    setEdges((eds) => [
-      ...eds,
-      {
-        id: `edge-${sourceNodeId}-${messageNode.id}`,
-        source: sourceNodeId,
-        target: messageNode.id,
-        animated: true,
-      },
-    ]);
-  }, [nodes, setNodes, setEdges]);
-
-  const createPollNode = useCallback((sourceNodeId: string) => {
-    const sourceNode = nodes.find((n) => n.id === sourceNodeId);
-    if (!sourceNode) return;
-
-    const pollNode: CustomNode = {
-      id: `poll-${Date.now()}`,
-      type: "poll",
-      position: {
-        x: sourceNode.position.x,
-        y: sourceNode.position.y + 200,
-      },
-      data: {
-        question: "",
-        options: [],
-        onQuestionChange: (question: string) => {
-          setNodes((nds) =>
-            nds.map((n) =>
-              n.id === `poll-${Date.now()}`
-                ? { ...n, data: { ...n.data, question } }
-                : n
-            )
-          );
-        },
-        onOptionsChange: (options: any[]) => {
-          setNodes((nds) =>
-            nds.map((n) =>
-              n.id === `poll-${Date.now()}`
-                ? { ...n, data: { ...n.data, options } }
-                : n
-            )
-          );
-        },
-      },
-    };
-
-    setNodes((nds) => [...nds, pollNode]);
-    setEdges((eds) => [
-      ...eds,
-      {
-        id: `edge-${sourceNodeId}-${pollNode.id}`,
-        source: sourceNodeId,
-        target: pollNode.id,
-        animated: true,
-      },
-    ]);
-  }, [nodes, setNodes, setEdges]);
-
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
       return {
@@ -190,6 +115,7 @@ const Index = () => {
           onTagSelect: (tagId: string) => handleTagSelect(node.id, tagId),
           onMessageCreate: () => createMessageNode(node.id),
           onPollCreate: () => createPollNode(node.id),
+          onAudienceChange: (audienceId: string) => handleAudienceChange(node.id, audienceId),
         },
       };
     }

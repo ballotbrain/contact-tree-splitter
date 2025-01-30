@@ -8,7 +8,7 @@ import { useState } from "react";
 interface PollOption {
   id: string;
   text: string;
-  leadsTo?: 'next' | 'complete';
+  leadsTo: 'next' | 'complete';
 }
 
 interface PollNodeProps {
