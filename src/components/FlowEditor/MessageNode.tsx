@@ -7,7 +7,9 @@ import {
   Link as LinkIcon, 
   Image as ImageIcon,
   Trash2,
-  SmilePlus
+  SmilePlus,
+  Calendar,
+  Clock
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { 
@@ -17,13 +19,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface MessageNodeProps {
   data: {
@@ -32,16 +36,19 @@ interface MessageNodeProps {
     onDelete?: () => void;
     areaCode?: string;
     onAreaCodeChange?: (code: string) => void;
+    scheduledTime?: Date;
+    onScheduleChange?: (date: Date) => void;
   };
 }
 
 const MAX_CHARS = 2000;
-
 const AREA_CODES = ["415", "628", "510"];
 
 const MessageNode = ({ data }: MessageNodeProps) => {
   const [links, setLinks] = useState<string[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,6 +85,18 @@ const MessageNode = ({ data }: MessageNodeProps) => {
     });
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      data.onScheduleChange?.(date);
+      setShowCalendar(false);
+      toast({
+        title: "Schedule Updated",
+        description: `Message scheduled for ${format(date, "PPpp")}`,
+      });
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
       <div className="flex items-center justify-between mb-3">
@@ -97,6 +116,38 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               </option>
             ))}
           </select>
+          <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-500 hover:text-gray-700"
+              >
+                {selectedDate ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Calendar className="h-4 w-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Scheduled for {format(selectedDate, "PPpp")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Calendar className="h-4 w-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
           {data.onDelete && (
             <Button
               variant="ghost"
