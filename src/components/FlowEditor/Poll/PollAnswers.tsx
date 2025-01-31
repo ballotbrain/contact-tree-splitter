@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { SmilePlus, Plus } from "lucide-react";
+import { SmilePlus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PollOption } from "@/types/flow";
@@ -12,7 +11,6 @@ interface PollAnswersProps {
   onLabelTypeChange: (value: "numerical" | "alphabetical") => void;
   updateOption: (id: string, text: string) => void;
   toggleOptionLeadsTo: (id: string) => void;
-  addNewOption: () => void;
 }
 
 export const PollAnswers = ({
@@ -21,7 +19,6 @@ export const PollAnswers = ({
   onLabelTypeChange,
   updateOption,
   toggleOptionLeadsTo,
-  addNewOption,
 }: PollAnswersProps) => {
   const getOptionLabel = (index: number) => {
     if (labelType === "numerical") {
@@ -83,16 +80,6 @@ export const PollAnswers = ({
             </div>
           </div>
         ))}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={addNewOption}
-          className="w-full mt-2"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Answer
-        </Button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { PollOption } from "@/types/flow";
 import { PollHeader } from "./Poll/PollHeader";
 import { PollQuestion } from "./Poll/PollQuestion";
 import { PollAnswers } from "./Poll/PollAnswers";
+import { format } from "date-fns";
 
 interface PollNodeProps {
   data: {
@@ -27,6 +28,7 @@ const DEFAULT_OPTIONS: PollOption[] = [
   { id: "2", text: "", leadsTo: "next" },
   { id: "3", text: "", leadsTo: "next" }
 ];
+
 const MAX_CHARS = 500;
 
 const PollNode = ({ data }: PollNodeProps) => {
@@ -80,15 +82,6 @@ const PollNode = ({ data }: PollNodeProps) => {
     data.onOptionsChange(updatedOptions);
   };
 
-  const addNewOption = () => {
-    const newOption: PollOption = {
-      id: `${data.options.length + 1}`,
-      text: "",
-      leadsTo: "next"
-    };
-    data.onOptionsChange([...data.options, newOption]);
-  };
-
   return (
     <div className="flex gap-8">
       <div className="bg-white rounded-lg shadow-md p-4 min-w-[400px] border border-gray-200">
@@ -133,7 +126,6 @@ const PollNode = ({ data }: PollNodeProps) => {
         onLabelTypeChange={setLabelType}
         updateOption={updateOption}
         toggleOptionLeadsTo={toggleOptionLeadsTo}
-        addNewOption={addNewOption}
       />
     </div>
   );
