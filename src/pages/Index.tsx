@@ -11,13 +11,13 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Zap, History } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle } from "lucide-react";
+
+import AudienceNode from "@/components/FlowEditor/AudienceNode";
+import MessageNode from "@/components/FlowEditor/MessageNode";
+import SequenceNode from "@/components/FlowEditor/SequenceNode";
+import PollNode from "@/components/FlowEditor/PollNode";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -27,24 +27,59 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomNode, CustomEdge } from "@/types/flow";
-import { STOP_PHRASES, DEMOGRAPHIC_TAGS, AVAILABLE_AUDIENCES } from "@/constants/flow";
-import { initialNodes } from "@/config/initial-nodes";
-import AudienceNode from "@/components/FlowEditor/AudienceNode";
-import MessageNode from "@/components/FlowEditor/MessageNode";
-import PollNode from "@/components/FlowEditor/PollNode";
-import { createPollNode } from "@/utils/flow-helpers";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const nodeTypes = {
   audience: AudienceNode,
   message: MessageNode,
+  sequence: SequenceNode,
   poll: PollNode,
 };
 
-interface JourneyStep {
-  id: string;
-  description: string;
-  timestamp: Date;
-}
+const DEMOGRAPHIC_TAGS = [
+  { id: "age_18_24", name: "Age 18-24", segmentSize: 15000 },
+  { id: "age_25_34", name: "Age 25-34", segmentSize: 25000 },
+  { id: "age_35_plus", name: "Age 35+", segmentSize: 30000 },
+  { id: "gender_male", name: "Male", segmentSize: 35000 },
+  { id: "gender_female", name: "Female", segmentSize: 35000 },
+  { id: "location_urban", name: "Urban", segmentSize: 40000 },
+  { id: "location_rural", name: "Rural", segmentSize: 30000 }
+];
+
+const AVAILABLE_AUDIENCES = [
+  { id: "csv1", name: "CSV Import 1", contacts: 50000 },
+  { id: "csv2", name: "CSV Import 2", contacts: 75000 },
+  { id: "csv3", name: "CSV Import 3", contacts: 100000 },
+  { id: "csv4", name: "CSV Import 4", contacts: 85000 }
+];
+
+const STOP_PHRASES = [
+  "Reply STOP to opt out",
+  "Reply STOP to cancel",
+  "STOP 2 END",
+  "Reply STOP to unsubscribe"
+] as const;
+
+const initialNodes: CustomNode[] = [
+  {
+    id: "1",
+    type: "audience",
+    position: { x: 400, y: 100 },
+    data: { 
+      label: "HD40 Universe",
+      contacts: 100000,
+      selectedTags: [],
+      selectedAudiences: [],
+      onMessageCreate: () => {},
+      onPollCreate: () => {},
+    },
+  },
+];
 
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
@@ -53,15 +88,6 @@ const Index = () => {
   const [hasSelectedAudience, setHasSelectedAudience] = useState(false);
   const [stopPhrase, setStopPhrase] = useState<typeof STOP_PHRASES[number]>(STOP_PHRASES[0]);
   const { toast } = useToast();
-  const [journeySteps, setJourneySteps] = useState<JourneyStep[]>([]);
-
-  const addJourneyStep = useCallback((description: string) => {
-    setJourneySteps(steps => [...steps, {
-      id: `step-${Date.now()}`,
-      description,
-      timestamp: new Date()
-    }]);
-  }, []);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -114,18 +140,11 @@ const Index = () => {
         content: '',
         onChange: (content: string) => {
           setNodes(nds => 
-            nds.map(node => {
-              if (node.id === `message-${Date.now()}`) {
-                const previewText = content.length > 30 
-                  ? `${content.substring(0, 30)}...` 
-                  : content;
-                if (content) {
-                  addJourneyStep(`Added message: "${previewText}"`);
-                }
-                return { ...node, data: { ...node.data, content } };
-              }
-              return node;
-            })
+            nds.map(node => 
+              node.id === `message-${Date.now()}` 
+                ? { ...node, data: { ...node.data, content } }
+                : node
+            )
           );
         },
         onDelete: () => deleteNode(`message-${Date.now()}`),
@@ -138,14 +157,13 @@ const Index = () => {
       source: sourceId,
       target: newNode.id,
     }]);
-  }, [nodes, setNodes, setEdges, deleteNode, addJourneyStep]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
 
   const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, parentAudienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
     if (!parentNode) return;
 
     const tagName = DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name;
-    addJourneyStep(`Segmented "${parentAudienceName}" by ${tagName}`);
     
     const segmentNode: CustomNode = {
       id: `segment-${Date.now()}`,
@@ -171,7 +189,7 @@ const Index = () => {
       target: segmentNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, addJourneyStep]);
+  }, [nodes, setNodes, setEdges]);
 
   const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
     setNodes(nds =>
@@ -180,15 +198,6 @@ const Index = () => {
           const totalContacts = AVAILABLE_AUDIENCES
             .filter(audience => audienceIds.includes(audience.id))
             .reduce((sum, audience) => sum + audience.contacts, 0);
-          
-          const selectedAudienceNames = AVAILABLE_AUDIENCES
-            .filter(audience => audienceIds.includes(audience.id))
-            .map(audience => audience.name)
-            .join(", ");
-
-          if (audienceIds.length > 0) {
-            addJourneyStep(`Selected audience: ${selectedAudienceNames}`);
-          }
           
           setHasSelectedAudience(audienceIds.length > 0);
           
@@ -204,7 +213,58 @@ const Index = () => {
         return node;
       })
     );
-  }, [setNodes, addJourneyStep]);
+  }, [setNodes]);
+
+  const createPollNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
+    const existingPollNodes = nodes.filter(n => n.type === 'poll');
+    const questionNumber = existingPollNodes.length + 1;
+
+    const newNode: CustomNode = {
+      id: `poll-${Date.now()}`,
+      type: 'poll',
+      position: { 
+        x: sourceNode.position.x, 
+        y: sourceNode.position.y + 250
+      },
+      data: {
+        question: '',
+        options: [],
+        questionNumber,
+        onQuestionChange: (question: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, question } }
+                : node
+            )
+          );
+        },
+        onOptionsChange: (options: any[]) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, options } }
+                : node
+            )
+          );
+        },
+        onDelete: () => deleteNode(`poll-${Date.now()}`),
+        onAddNextQuestion: () => {
+          createPollNode(`poll-${Date.now()}`);
+        },
+      },
+    };
+
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
@@ -218,8 +278,6 @@ const Index = () => {
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),
           onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
-          actionTriggerIcon: <Zap className="h-4 w-4" />,
-          actionTriggerText: "Action",
         },
       };
     }
@@ -260,36 +318,10 @@ const Index = () => {
         <Background />
         <Controls />
         <Panel position="top-left" className="bg-white p-4 rounded-lg shadow-md">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-xl font-semibold text-black">Flow Title</h2>
-            <span className="text-sm text-gray-600">
-              Auto-saved at {format(new Date(), "p 'on' PP")}
-            </span>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <History className="h-4 w-4" />
-              User Journey
-            </div>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {journeySteps.map((step) => (
-                <div 
-                  key={step.id}
-                  className="text-sm text-gray-600 flex items-start gap-2"
-                >
-                  <span className="text-gray-400 mt-1">•</span>
-                  <span>{step.description}</span>
-                </div>
-              ))}
-              {journeySteps.length === 0 && (
-                <div className="text-sm text-gray-400 italic">
-                  No actions taken yet
-                </div>
-              )}
-            </div>
-          </div>
-
+          <h2 className="text-xl font-semibold text-black mb-1">Flow Title</h2>
+          <p className="text-sm text-gray-600">
+            Auto-saved at {format(new Date(), "p 'on' PP")}
+          </p>
           <div className="mt-3 flex items-center text-sm text-gray-900">
             <ChevronRight className="h-4 w-4 animate-bounce" />
             <Tooltip delayDuration={0}>
@@ -301,29 +333,25 @@ const Index = () => {
               </TooltipContent>
             </Tooltip>
           </div>
-          
-          <div className="mt-2 flex items-center text-sm text-gray-900">
-            {hasSelectedAudience && (
-              <div className="mt-2 flex items-center text-sm text-gray-900">
-                <ChevronRight className="h-4 w-4 animate-bounce" />
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">Choose your next action</span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
-                    <p>You can now:</p>
-                    <ul className="list-disc ml-4 mt-1">
-                      <li>Segment your audience by demographics</li>
-                      <li>Create a message to send</li>
-                      <li>Create a poll to gather feedback</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-          </div>
+          {hasSelectedAudience && (
+            <div className="mt-2 flex items-center text-sm text-gray-900">
+              <ChevronRight className="h-4 w-4 animate-bounce" />
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">Choose your next action</span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
+                  <p>You can now:</p>
+                  <ul className="list-disc ml-4 mt-1">
+                    <li>Segment your audience by demographics</li>
+                    <li>Create a message to send</li>
+                    <li>Create a poll to gather feedback</li>
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </Panel>
-        
         <Panel position="top-right" className="flex gap-2">
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
             <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
