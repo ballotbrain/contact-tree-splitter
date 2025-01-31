@@ -34,7 +34,7 @@ export const PollAnswers = ({
   };
 
   return (
-    <div className="relative bg-white rounded-lg shadow-md p-4 border border-gray-200">
+    <div className="relative bg-white rounded-lg shadow-md p-4 border border-gray-200 min-w-[300px]">
       <div className="absolute -left-8 top-1/2 w-8 h-[2px] bg-gray-200"></div>
       
       <div className="mb-4">
@@ -67,7 +67,7 @@ export const PollAnswers = ({
                   value={option.text}
                   onChange={(e) => updateOption(option.id, e.target.value)}
                   placeholder="Enter answer"
-                  className="bg-white border-0 focus-visible:ring-0"
+                  className="bg-white border-0 focus-visible:ring-0 min-h-[60px]"
                 />
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-2">

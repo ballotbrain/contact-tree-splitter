@@ -1,5 +1,5 @@
 import { Handle, Position } from "@xyflow/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PollOption } from "@/types/flow";
 import { PollHeader } from "./Poll/PollHeader";
 import { PollQuestion } from "./Poll/PollQuestion";
@@ -30,10 +30,11 @@ const PollNode = ({ data }: PollNodeProps) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [labelType, setLabelType] = useState<"numerical" | "alphabetical">("numerical");
 
-  // Initialize options if empty
-  if (!data.options || data.options.length === 0) {
-    data.onOptionsChange(DEFAULT_OPTIONS);
-  }
+  useEffect(() => {
+    if (!data.options || data.options.length === 0) {
+      data.onOptionsChange(DEFAULT_OPTIONS);
+    }
+  }, []);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
