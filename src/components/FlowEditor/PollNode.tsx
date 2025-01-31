@@ -4,12 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ListOrdered, ListCheck, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-
-interface PollOption {
-  id: string;
-  text: string;
-  leadsTo: 'next' | 'complete';
-}
+import { PollOption } from "@/types/flow";
 
 interface PollNodeProps {
   data: {
@@ -28,7 +23,7 @@ const PollNode = ({ data }: PollNodeProps) => {
     const newOption: PollOption = {
       id: `option-${data.options.length + 1}`,
       text: "",
-      leadsTo: 'next'
+      leadsTo: 'next' // Explicitly set as 'next' to match the PollOption type
     };
     data.onOptionsChange([...data.options, newOption]);
   };
