@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight } from "lucide-react";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
@@ -20,6 +20,12 @@ import PollNode from "@/components/FlowEditor/PollNode";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomNode, CustomEdge } from "@/types/flow";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const nodeTypes = {
   audience: AudienceNode,
@@ -298,6 +304,17 @@ const Index = () => {
           <p className="text-sm text-gray-600">
             Saved at {format(new Date(), "p 'on' PP")}
           </p>
+          <div className="mt-3 flex items-center text-sm text-blue-600">
+            <ChevronRight className="h-4 w-4 animate-bounce" />
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <span className="cursor-help">Start by selecting your audience</span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[200px]">
+                <p>Click the dropdown in the audience node to choose your target audience</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </Panel>
         <Panel position="top-right" className="flex gap-2">
           <Button 
