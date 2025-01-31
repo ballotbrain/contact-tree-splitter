@@ -1,29 +1,10 @@
 import { Handle, Position } from "@xyflow/react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ListOrdered, Calendar, Clock, Trash2, SmilePlus, ImageIcon, Plus } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { PollOption } from "@/types/flow";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/components/ui/use-toast";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
+import { PollHeader } from "./Poll/PollHeader";
+import { PollQuestion } from "./Poll/PollQuestion";
+import { PollAnswers } from "./Poll/PollAnswers";
 
 interface PollNodeProps {
   data: {
@@ -41,7 +22,6 @@ interface PollNodeProps {
   };
 }
 
-const AREA_CODES = ["415", "628", "510"];
 const DEFAULT_OPTIONS: PollOption[] = [
   { id: "1", text: "", leadsTo: "next" },
   { id: "2", text: "", leadsTo: "next" },
@@ -109,140 +89,31 @@ const PollNode = ({ data }: PollNodeProps) => {
     data.onOptionsChange([...data.options, newOption]);
   };
 
-  const getOptionLabel = (index: number) => {
-    if (labelType === "numerical") {
-      return `${index + 1} =`;
-    } else {
-      return String.fromCharCode(65 + index) + " =";
-    }
-  };
-
   return (
     <div className="flex gap-8">
       <div className="bg-white rounded-lg shadow-md p-4 min-w-[400px] border border-gray-200">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <ListOrdered className="w-4 h-4 text-gray-600" />
-            <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              Poll Question {data.questionNumber || 1}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={data.areaCode}
-              onChange={(e) => data.onAreaCodeChange?.(e.target.value)}
-              className="text-sm border border-gray-200 rounded px-2 py-1 bg-white text-black"
-            >
-              {AREA_CODES.map((code) => (
-                <option key={code} value={code}>
-                  ({code})
-                </option>
-              ))}
-            </select>
-            <Popover open={showCalendar} onOpenChange={setShowCalendar}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-gray-500 hover:text-blue-600"
-                >
-                  {selectedDate ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Clock className="h-4 w-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-sm">Scheduled for {format(selectedDate, "PPpp")}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <Calendar className="h-4 w-4" />
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <div className="p-3 border-b border-gray-100">
-                  <h4 className="text-sm font-medium">Schedule Poll</h4>
-                </div>
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            {data.onDelete && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={data.onDelete}
-                className="h-8 w-8 text-gray-500 hover:text-red-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
+        <PollHeader
+          questionNumber={data.questionNumber || 1}
+          areaCode={data.areaCode}
+          onAreaCodeChange={data.onAreaCodeChange}
+          selectedDate={selectedDate}
+          onDateSelect={handleDateSelect}
+          showCalendar={showCalendar}
+          setShowCalendar={setShowCalendar}
+          onDelete={data.onDelete}
+        />
 
-        <div className="space-y-3">
-          <Textarea
-            value={data.question}
-            onChange={(e) => {
-              if (e.target.value.length <= MAX_CHARS) {
-                data.onQuestionChange(e.target.value);
-              }
-            }}
-            placeholder="Enter your question..."
-            className="mb-2"
-          />
-          
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <SmilePlus className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Picker 
-                    data={data} 
-                    onEmojiSelect={handleEmojiSelect}
-                    theme="light"
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleMediaUpload}
-                className="h-8 w-8"
-              >
-                <ImageIcon className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <span>
-              {data.question.length}/{MAX_CHARS}
-            </span>
-          </div>
-
-          {data.onAddNextQuestion && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={data.onAddNextQuestion}
-              className="w-full mt-4"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Question {(data.questionNumber || 1) + 1}
-            </Button>
-          )}
-        </div>
+        <PollQuestion
+          question={data.question}
+          onQuestionChange={data.onQuestionChange}
+          showEmojiPicker={showEmojiPicker}
+          setShowEmojiPicker={setShowEmojiPicker}
+          onEmojiSelect={handleEmojiSelect}
+          handleMediaUpload={handleMediaUpload}
+          maxChars={MAX_CHARS}
+          questionNumber={data.questionNumber}
+          onAddNextQuestion={data.onAddNextQuestion}
+        />
 
         <Handle
           type="target"
@@ -256,69 +127,14 @@ const PollNode = ({ data }: PollNodeProps) => {
         />
       </div>
 
-      <div className="relative bg-white rounded-lg shadow-md p-4 border border-gray-200">
-        <div className="absolute -left-8 top-1/2 w-8 h-[2px] bg-gray-200"></div>
-        
-        <div className="mb-4">
-          <Label className="text-sm font-medium">Label Type:</Label>
-          <RadioGroup
-            value={labelType}
-            onValueChange={(value) => setLabelType(value as "numerical" | "alphabetical")}
-            className="flex gap-4 mt-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="numerical" id="numerical" />
-              <Label htmlFor="numerical">Numerical</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="alphabetical" id="alphabetical" />
-              <Label htmlFor="alphabetical">Alphabetical</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-4">
-          {data.options.map((option, index) => (
-            <div key={option.id} className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <span className="min-w-[40px] text-gray-400 font-medium">
-                  {getOptionLabel(index)}
-                </span>
-                <div className="flex-1 bg-gray-50 rounded-lg p-3">
-                  <Textarea
-                    value={option.text}
-                    onChange={(e) => updateOption(option.id, e.target.value)}
-                    placeholder="Enter answer"
-                    className="bg-white border-0 focus-visible:ring-0"
-                  />
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-2">
-                      <SmilePlus className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={option.leadsTo === "next"}
-                        onCheckedChange={() => toggleOptionLeadsTo(option.id)}
-                      />
-                      <span className="text-sm text-gray-500">Continue to next question</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addNewOption}
-            className="w-full mt-2"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Answer
-          </Button>
-        </div>
-      </div>
+      <PollAnswers
+        options={data.options}
+        labelType={labelType}
+        onLabelTypeChange={setLabelType}
+        updateOption={updateOption}
+        toggleOptionLeadsTo={toggleOptionLeadsTo}
+        addNewOption={addNewOption}
+      />
     </div>
   );
 };
