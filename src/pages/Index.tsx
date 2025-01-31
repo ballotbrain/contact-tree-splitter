@@ -18,6 +18,13 @@ import MessageNode from "@/components/FlowEditor/MessageNode";
 import SequenceNode from "@/components/FlowEditor/SequenceNode";
 import PollNode from "@/components/FlowEditor/PollNode";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomNode, CustomEdge } from "@/types/flow";
 import {
@@ -51,6 +58,13 @@ const AVAILABLE_AUDIENCES = [
   { id: "csv4", name: "CSV Import 4", contacts: 85000 }
 ];
 
+const STOP_PHRASES = [
+  "Reply STOP to opt out",
+  "Reply STOP to cancel",
+  "STOP 2 END",
+  "Reply STOP to unsubscribe"
+] as const;
+
 const initialNodes: CustomNode[] = [
   {
     id: "1",
@@ -72,6 +86,7 @@ const Index = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
   const [selectedAreaCode, setSelectedAreaCode] = useState("415");
   const [hasSelectedAudience, setHasSelectedAudience] = useState(false);
+  const [stopPhrase, setStopPhrase] = useState<typeof STOP_PHRASES[number]>(STOP_PHRASES[0]);
   const { toast } = useToast();
 
   const onConnect = useCallback(
@@ -338,6 +353,21 @@ const Index = () => {
           )}
         </Panel>
         <Panel position="top-right" className="flex gap-2">
+          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+            <span className="text-sm text-gray-700">STOP Phrase:</span>
+            <Select value={stopPhrase} onValueChange={setStopPhrase}>
+              <SelectTrigger className="w-[200px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STOP_PHRASES.map((phrase) => (
+                  <SelectItem key={phrase} value={phrase}>
+                    {phrase}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button 
             variant="outline" 
             onClick={resetFlow}
