@@ -52,12 +52,24 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
     .filter(audience => data.selectedAudiences?.includes(audience.id))
     .reduce((sum, audience) => sum + audience.contacts, 0);
 
+  const selectedAudienceNames = AVAILABLE_AUDIENCES
+    .filter(audience => data.selectedAudiences?.includes(audience.id))
+    .map(audience => {
+      // Abbreviate names longer than 15 characters
+      return audience.name.length > 15 
+        ? `${audience.name.substring(0, 12)}...` 
+        : audience.name;
+    })
+    .join(", ");
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-600" />
-          <span className="font-semibold text-gray-900">{data.label}</span>
+          <span className="font-semibold text-gray-900">
+            {data.selectedAudiences?.length ? selectedAudienceNames : "Select Audience"}
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
@@ -86,9 +98,11 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <Badge variant="secondary" className="text-sm px-3">
-          {totalContacts.toLocaleString()} contacts
-        </Badge>
+        {totalContacts > 0 && (
+          <Badge variant="secondary" className="text-sm px-3">
+            {totalContacts.toLocaleString()} contacts
+          </Badge>
+        )}
       </div>
 
       <div className="space-y-2">

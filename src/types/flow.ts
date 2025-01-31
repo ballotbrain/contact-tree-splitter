@@ -13,8 +13,9 @@ export interface AudienceNodeData extends Record<string, unknown> {
   onSegment?: () => void;
   onMessageCreate?: () => void;
   onPollCreate?: () => void;
-  onTagSelect?: (tagId: string) => void;
-  onAudienceChange?: (audienceId: string) => void;
+  onTagSelect?: (tagId: string, segmentSize: number) => void;
+  onAudienceChange?: (audienceIds: string[]) => void;
+  selectedAudiences?: string[];
 }
 
 export interface MessageNodeData extends Record<string, unknown> {
@@ -35,7 +36,7 @@ export interface SequenceNodeData extends Record<string, unknown> {
 export interface PollOption {
   id: string;
   text: string;
-  leadsTo: 'next' | 'complete';
+  leadsTo: "next" | "complete";
 }
 
 export interface PollNodeData extends Record<string, unknown> {
