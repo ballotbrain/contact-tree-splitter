@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw, ChevronRight } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight, Info } from "lucide-react";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
@@ -355,6 +355,14 @@ const Index = () => {
         <Panel position="top-right" className="flex gap-2">
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
             <span className="text-sm font-bold text-gray-700">STOP Phrase:</span>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-gray-500 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
+                <p>This message is automatically appended to all messages for proper compliance</p>
+              </TooltipContent>
+            </Tooltip>
             <Select 
               value={stopPhrase} 
               onValueChange={(value: typeof STOP_PHRASES[number]) => setStopPhrase(value)}
