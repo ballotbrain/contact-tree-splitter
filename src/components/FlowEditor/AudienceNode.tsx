@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 
 interface Tag {
@@ -23,8 +24,9 @@ interface AudienceNodeProps {
     onMessageCreate?: () => void;
     onPollCreate?: () => void;
     selectedTags?: string[];
+    selectedAudiences?: string[];
     onTagSelect?: (tagId: string, segmentSize: number) => void;
-    onAudienceChange?: (audienceId: string) => void;
+    onAudienceChange?: (audienceIds: string[]) => void;
   };
 }
 
@@ -46,6 +48,10 @@ const AVAILABLE_AUDIENCES = [
 ];
 
 const AudienceNode = ({ data }: AudienceNodeProps) => {
+  const totalContacts = AVAILABLE_AUDIENCES
+    .filter(audience => data.selectedAudiences?.includes(audience.id))
+    .reduce((sum, audience) => sum + audience.contacts, 0);
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100">
       <div className="flex items-center justify-between mb-4">
@@ -60,22 +66,28 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               {AVAILABLE_AUDIENCES.map((audience) => (
-                <DropdownMenuItem
+                <DropdownMenuCheckboxItem
                   key={audience.id}
-                  onClick={() => data.onAudienceChange?.(audience.id)}
+                  checked={data.selectedAudiences?.includes(audience.id)}
+                  onCheckedChange={(checked) => {
+                    const newSelection = checked
+                      ? [...(data.selectedAudiences || []), audience.id]
+                      : (data.selectedAudiences || []).filter(id => id !== audience.id);
+                    data.onAudienceChange?.(newSelection);
+                  }}
                   className="flex items-center justify-between"
                 >
                   <span>{audience.name}</span>
                   <Badge variant="secondary" className="ml-2">
                     {audience.contacts.toLocaleString()} contacts
                   </Badge>
-                </DropdownMenuItem>
+                </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
         <Badge variant="secondary" className="text-sm px-3">
-          {data.contacts.toLocaleString()} contacts
+          {totalContacts.toLocaleString()} contacts
         </Badge>
       </div>
 
@@ -113,7 +125,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           onClick={data.onMessageCreate}
         >
           <MessageSquare className="w-4 h-4 mr-2" />
-          Add Message
+          Message
         </Button>
 
         <Button 
@@ -123,7 +135,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           onClick={data.onPollCreate}
         >
           <ListOrdered className="w-4 h-4 mr-2" />
-          Add Poll
+          Poll
         </Button>
       </div>
 

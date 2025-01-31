@@ -52,8 +52,9 @@ const initialNodes: CustomNode[] = [
     position: { x: 400, y: 100 },
     data: { 
       label: "HD40 Universe",
-      contacts: 100,
+      contacts: 100000,
       selectedTags: [],
+      selectedAudiences: [],
       onMessageCreate: () => {},
       onPollCreate: () => {},
     },
@@ -80,7 +81,7 @@ const Index = () => {
       type: 'audience',
       position: { 
         x: parentNode.position.x, 
-        y: parentNode.position.y + 200 
+        y: parentNode.position.y + 250 // Increased vertical spacing
       },
       data: {
         label: `Segment: ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
@@ -96,36 +97,22 @@ const Index = () => {
       source: nodeId,
       target: segmentNode.id,
     }]);
-
-    setNodes(nds => 
-      nds.map(node => {
-        if (node.id === nodeId && node.data.selectedTags) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              selectedTags: [...node.data.selectedTags, tagId],
-            },
-          };
-        }
-        return node;
-      })
-    );
   }, [nodes, setNodes, setEdges]);
 
-  const handleAudienceChange = useCallback((nodeId: string, audienceId: string) => {
-    const selectedAudience = AVAILABLE_AUDIENCES.find(a => a.id === audienceId);
-    if (!selectedAudience) return;
-
+  const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
     setNodes(nds =>
       nds.map(node => {
         if (node.id === nodeId) {
+          const totalContacts = AVAILABLE_AUDIENCES
+            .filter(audience => audienceIds.includes(audience.id))
+            .reduce((sum, audience) => sum + audience.contacts, 0);
+          
           return {
             ...node,
             data: {
               ...node.data,
-              label: selectedAudience.name,
-              contacts: selectedAudience.contacts,
+              selectedAudiences: audienceIds,
+              contacts: totalContacts,
             },
           };
         }
@@ -143,7 +130,7 @@ const Index = () => {
       type: 'message',
       position: { 
         x: sourceNode.position.x, 
-        y: sourceNode.position.y + 200 
+        y: sourceNode.position.y + 250 // Increased vertical spacing
       },
       data: {
         content: '',
@@ -176,7 +163,7 @@ const Index = () => {
       type: 'poll',
       position: { 
         x: sourceNode.position.x, 
-        y: sourceNode.position.y + 200 
+        y: sourceNode.position.y + 250 // Increased vertical spacing
       },
       data: {
         question: '',
@@ -210,20 +197,6 @@ const Index = () => {
     }]);
   }, [nodes, setNodes, setEdges]);
 
-  const handlePreview = () => {
-    toast({
-      title: "Preview Mode",
-      description: "Preview functionality will be implemented here",
-    });
-  };
-
-  const handleSubmit = () => {
-    toast({
-      title: "Flow Submitted",
-      description: "Your flow has been submitted successfully",
-    });
-  };
-
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
       return {
@@ -233,7 +206,7 @@ const Index = () => {
           onTagSelect: (tagId: string, segmentSize: number) => handleTagSelect(node.id, tagId, segmentSize),
           onMessageCreate: () => createMessageNode(node.id),
           onPollCreate: () => createPollNode(node.id),
-          onAudienceChange: (audienceId: string) => handleAudienceChange(node.id, audienceId),
+          onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),
         },
       };
     }
@@ -272,14 +245,24 @@ const Index = () => {
         <Panel position="top-right" className="flex gap-2">
           <Button 
             variant="outline" 
-            onClick={handlePreview}
+            onClick={() => {
+              toast({
+                title: "Preview Mode",
+                description: "Preview functionality will be implemented here",
+              });
+            }}
             className="bg-white text-black border-gray-200 hover:bg-gray-50"
           >
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
           <Button 
-            onClick={handleSubmit}
+            onClick={() => {
+              toast({
+                title: "Flow Submitted",
+                description: "Your flow has been submitted successfully",
+              });
+            }}
             className="bg-black text-white hover:bg-gray-900"
           >
             <Send className="mr-2 h-4 w-4" />
