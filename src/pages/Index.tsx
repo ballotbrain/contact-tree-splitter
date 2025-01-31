@@ -166,6 +166,28 @@ const Index = () => {
     }]);
   }, [nodes, setNodes, setEdges]);
 
+  const getChildNodes = (nodeId: string): string[] => {
+    const childEdges = edges.filter(edge => edge.source === nodeId);
+    const childIds = childEdges.map(edge => edge.target);
+    const descendantIds: string[] = [];
+    
+    childIds.forEach(childId => {
+      descendantIds.push(childId);
+      descendantIds.push(...getChildNodes(childId));
+    });
+    
+    return descendantIds;
+  };
+
+  const deleteNode = useCallback((nodeId: string) => {
+    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
+    
+    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
+    setEdges(eds => eds.filter(edge => 
+      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
+    ));
+  }, [edges, setNodes, setEdges]);
+
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
     if (!sourceNode) return;
@@ -178,7 +200,7 @@ const Index = () => {
       type: 'poll',
       position: { 
         x: sourceNode.position.x, 
-        y: sourceNode.position.y + 250 // Increased vertical spacing
+        y: sourceNode.position.y + 250
       },
       data: {
         question: '',
@@ -202,13 +224,7 @@ const Index = () => {
             )
           );
         },
-        onDelete: () => {
-          setNodes(nds => nds.filter(node => node.id !== `poll-${Date.now()}`));
-          setEdges(eds => eds.filter(edge => 
-            edge.source !== `poll-${Date.now()}` && 
-            edge.target !== `poll-${Date.now()}`
-          ));
-        },
+        onDelete: () => deleteNode(`poll-${Date.now()}`),
         onAddNextQuestion: () => {
           createPollNode(`poll-${Date.now()}`);
         },
@@ -221,7 +237,7 @@ const Index = () => {
       source: sourceId,
       target: newNode.id,
     }]);
-  }, [nodes, setNodes, setEdges]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
@@ -244,6 +260,15 @@ const Index = () => {
           ...node.data,
           areaCode: selectedAreaCode,
           onAreaCodeChange: setSelectedAreaCode,
+        },
+      };
+    }
+    if (node.type === "poll") {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          onDelete: () => deleteNode(node.id),
         },
       };
     }
