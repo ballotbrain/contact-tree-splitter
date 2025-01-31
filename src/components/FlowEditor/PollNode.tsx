@@ -2,7 +2,7 @@ import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ListOrdered, Calendar, Clock, Trash2 } from "lucide-react";
+import { ListOrdered, Calendar, Clock, Trash2, SmilePlus, ImageIcon, Plus } from "lucide-react";
 import { useState } from "react";
 import { PollOption } from "@/types/flow";
 import {
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 
 interface PollNodeProps {
   data: {
@@ -41,10 +43,12 @@ const DEFAULT_OPTIONS: PollOption[] = [
   { id: "2", text: "", leadsTo: "next" },
   { id: "3", text: "", leadsTo: "next" }
 ];
+const MAX_CHARS = 500;
 
 const PollNode = ({ data }: PollNodeProps) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { toast } = useToast();
 
   // Initialize options if empty
@@ -64,6 +68,19 @@ const PollNode = ({ data }: PollNodeProps) => {
     }
   };
 
+  const handleEmojiSelect = (emoji: any) => {
+    if (data.question.length + emoji.native.length <= MAX_CHARS) {
+      data.onQuestionChange(data.question + emoji.native);
+    }
+  };
+
+  const handleMediaUpload = () => {
+    toast({
+      title: "Media Upload",
+      description: "Media upload functionality will be implemented here",
+    });
+  };
+
   const updateOption = (id: string, text: string) => {
     const updatedOptions = data.options.map(opt =>
       opt.id === id ? { ...opt, text } : opt
@@ -76,6 +93,15 @@ const PollNode = ({ data }: PollNodeProps) => {
       opt.id === id ? { ...opt, leadsTo: opt.leadsTo === "next" ? "complete" : "next" } : opt
     ) as PollOption[];
     data.onOptionsChange(updatedOptions);
+  };
+
+  const addNewOption = () => {
+    const newOption: PollOption = {
+      id: `${data.options.length + 1}`,
+      text: "",
+      leadsTo: "next"
+    };
+    data.onOptionsChange([...data.options, newOption]);
   };
 
   return (
@@ -132,14 +158,52 @@ const PollNode = ({ data }: PollNodeProps) => {
         </div>
       </div>
 
-      <Textarea
-        value={data.question}
-        onChange={(e) => data.onQuestionChange(e.target.value)}
-        placeholder="Enter your question..."
-        className="mb-4"
-      />
+      <div className="space-y-3">
+        <Textarea
+          value={data.question}
+          onChange={(e) => {
+            if (e.target.value.length <= MAX_CHARS) {
+              data.onQuestionChange(e.target.value);
+            }
+          }}
+          placeholder="Enter your question..."
+          className="mb-2"
+        />
+        
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center gap-2">
+            <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <SmilePlus className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Picker 
+                  data={data} 
+                  onEmojiSelect={handleEmojiSelect}
+                  theme="light"
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleMediaUpload}
+              className="h-8 w-8"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <span>
+            {data.question.length}/{MAX_CHARS}
+          </span>
+        </div>
+      </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-4">
         {data.options.map((option, index) => (
           <div key={option.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
@@ -170,6 +234,16 @@ const PollNode = ({ data }: PollNodeProps) => {
             </div>
           </div>
         ))}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addNewOption}
+          className="w-full mt-2"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Option
+        </Button>
       </div>
 
       <Handle
