@@ -142,6 +142,41 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               </option>
             ))}
           </select>
+          <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-500 hover:text-blue-600"
+              >
+                {selectedDate ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Clock className="h-4 w-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">Scheduled for {format(selectedDate, "PPpp")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Calendar className="h-4 w-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <div className="p-3 border-b border-gray-100">
+                <h4 className="text-sm font-medium">Schedule Message</h4>
+              </div>
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
           {data.onDelete && (
             <Button
               variant="ghost"
