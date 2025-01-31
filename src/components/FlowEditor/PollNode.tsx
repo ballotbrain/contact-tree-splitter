@@ -36,10 +36,10 @@ interface PollNodeProps {
 }
 
 const AREA_CODES = ["415", "628", "510"];
-const DEFAULT_OPTIONS = [
-  { id: "1", text: "", leadsTo: "next" as const },
-  { id: "2", text: "", leadsTo: "next" as const },
-  { id: "3", text: "", leadsTo: "next" as const }
+const DEFAULT_OPTIONS: PollOption[] = [
+  { id: "1", text: "", leadsTo: "next" },
+  { id: "2", text: "", leadsTo: "next" },
+  { id: "3", text: "", leadsTo: "next" }
 ];
 
 const PollNode = ({ data }: PollNodeProps) => {
@@ -74,7 +74,7 @@ const PollNode = ({ data }: PollNodeProps) => {
   const toggleOptionLeadsTo = (id: string) => {
     const updatedOptions = data.options.map(opt =>
       opt.id === id ? { ...opt, leadsTo: opt.leadsTo === "next" ? "complete" : "next" } : opt
-    );
+    ) as PollOption[];
     data.onOptionsChange(updatedOptions);
   };
 
