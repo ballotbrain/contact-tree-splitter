@@ -12,6 +12,32 @@ import {
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
 import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Zap, History } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { CustomNode, CustomEdge } from "@/types/flow";
+import { STOP_PHRASES, DEMOGRAPHIC_TAGS, AVAILABLE_AUDIENCES } from "@/constants/flow";
+import { initialNodes } from "@/config/initial-nodes";
+import { AudienceNode } from "@/components/FlowEditor/AudienceNode";
+import { MessageNode } from "@/components/FlowEditor/MessageNode";
+import { PollNode } from "@/components/FlowEditor/PollNode";
+
+const nodeTypes = {
+  audience: AudienceNode,
+  message: MessageNode,
+  poll: PollNode,
+};
 
 interface JourneyStep {
   id: string;
