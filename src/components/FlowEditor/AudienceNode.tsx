@@ -50,42 +50,46 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
   const [showActions, setShowActions] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 min-w-[240px] border border-gray-200">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-gray-600" />
-          <span className="font-medium text-gray-900">{data.label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
-            {data.contacts} contacts
-          </Badge>
+          <Users className="w-5 h-5 text-gray-600" />
+          <span className="font-semibold text-gray-900">HD40 Universe</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Edit className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
+                <Edit className="h-4 w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-56">
               {AVAILABLE_AUDIENCES.map((audience) => (
                 <DropdownMenuItem
                   key={audience.id}
                   onClick={() => data.onAudienceChange?.(audience.id)}
+                  className="flex items-center justify-between"
                 >
-                  {audience.name}
+                  <span>{audience.name}</span>
+                  <Badge variant="secondary" className="ml-2">
+                    {audience.id === 'csv1' ? '150' : 
+                     audience.id === 'csv2' ? '200' : 
+                     audience.id === 'csv3' ? '300' : '250'} contacts
+                  </Badge>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <Badge variant="secondary" className="text-sm px-3">
+          {data.contacts} contacts
+        </Badge>
       </div>
 
-      <div className="mb-3">
+      <div className="mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="w-full">
               <Tag className="w-4 h-4 mr-2" />
-              Select Demographics
+              Segment
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
@@ -106,7 +110,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
       </div>
 
       {data.selectedTags && data.selectedTags.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {DEMOGRAPHIC_TAGS.filter(tag => data.selectedTags?.includes(tag.id)).map((tag) => (
               <Badge
