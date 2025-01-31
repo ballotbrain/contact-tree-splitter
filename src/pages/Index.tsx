@@ -170,6 +170,9 @@ const Index = () => {
     const sourceNode = nodes.find(n => n.id === sourceId);
     if (!sourceNode) return;
 
+    const existingPollNodes = nodes.filter(n => n.type === 'poll');
+    const questionNumber = existingPollNodes.length + 1;
+
     const newNode: CustomNode = {
       id: `poll-${Date.now()}`,
       type: 'poll',
@@ -180,6 +183,7 @@ const Index = () => {
       data: {
         question: '',
         options: [],
+        questionNumber,
         onQuestionChange: (question: string) => {
           setNodes(nds => 
             nds.map(node => 
@@ -204,6 +208,9 @@ const Index = () => {
             edge.source !== `poll-${Date.now()}` && 
             edge.target !== `poll-${Date.now()}`
           ));
+        },
+        onAddNextQuestion: () => {
+          createPollNode(`poll-${Date.now()}`);
         },
       },
     };

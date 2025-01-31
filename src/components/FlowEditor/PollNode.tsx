@@ -34,6 +34,8 @@ interface PollNodeProps {
     onAreaCodeChange?: (code: string) => void;
     scheduledTime?: Date;
     onScheduleChange?: (date: Date) => void;
+    questionNumber?: number;
+    onAddNextQuestion?: () => void;
   };
 }
 
@@ -111,7 +113,7 @@ const PollNode = ({ data }: PollNodeProps) => {
           <div className="flex items-center gap-2">
             <ListOrdered className="w-4 h-4 text-gray-600" />
             <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              Poll Question 1
+              Poll Question {data.questionNumber || 1}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -217,6 +219,18 @@ const PollNode = ({ data }: PollNodeProps) => {
               {data.question.length}/{MAX_CHARS}
             </span>
           </div>
+
+          {data.onAddNextQuestion && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={data.onAddNextQuestion}
+              className="w-full mt-4"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Question {(data.questionNumber || 1) + 1}
+            </Button>
+          )}
         </div>
 
         <Handle
