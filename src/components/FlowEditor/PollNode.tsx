@@ -125,38 +125,16 @@ const PollNode = ({ data }: PollNodeProps) => {
               </option>
             ))}
           </select>
-          <Popover open={showCalendar} onOpenChange={setShowCalendar}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-gray-500 hover:text-gray-700"
-              >
-                {selectedDate ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Calendar className="h-4 w-4" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Scheduled for {format(selectedDate, "PPpp")}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <Calendar className="h-4 w-4" />
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          {data.onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={data.onDelete}
+              className="h-8 w-8 text-gray-500 hover:text-red-600"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 

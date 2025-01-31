@@ -148,6 +148,13 @@ const Index = () => {
             )
           );
         },
+        onDelete: () => {
+          setNodes(nds => nds.filter(node => node.id !== `message-${Date.now()}`));
+          setEdges(eds => eds.filter(edge => 
+            edge.source !== `message-${Date.now()}` && 
+            edge.target !== `message-${Date.now()}`
+          ));
+        },
       },
     };
 
@@ -190,6 +197,13 @@ const Index = () => {
                 : node
             )
           );
+        },
+        onDelete: () => {
+          setNodes(nds => nds.filter(node => node.id !== `poll-${Date.now()}`));
+          setEdges(eds => eds.filter(edge => 
+            edge.source !== `poll-${Date.now()}` && 
+            edge.target !== `poll-${Date.now()}`
+          ));
         },
       },
     };
