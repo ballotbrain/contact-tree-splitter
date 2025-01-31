@@ -29,6 +29,11 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 
+interface KeywordTrigger {
+  keyword: string;
+  response: string;
+}
+
 interface MessageNodeProps {
   data: {
     content: string;
@@ -38,6 +43,8 @@ interface MessageNodeProps {
     onAreaCodeChange?: (code: string) => void;
     scheduledTime?: Date;
     onScheduleChange?: (date: Date) => void;
+    keywordTriggers?: KeywordTrigger[];
+    onKeywordTriggersChange?: (triggers: KeywordTrigger[]) => void;
   };
 }
 
@@ -50,6 +57,9 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
   const { toast } = useToast();
+  const [showKeywordModal, setShowKeywordModal] = useState(false);
+  const [newKeyword, setNewKeyword] = useState("");
+  const [newResponse, setNewResponse] = useState("");
 
   useEffect(() => {
     // URL detection regex
@@ -94,6 +104,22 @@ const MessageNode = ({ data }: MessageNodeProps) => {
         title: "Schedule Updated",
         description: `Message scheduled for ${format(date, "PPpp")}`,
       });
+    }
+  };
+
+  const addKeywordTrigger = () => {
+    if (newKeyword && newResponse) {
+      const newTrigger = {
+        keyword: newKeyword,
+        response: newResponse
+      };
+      data.onKeywordTriggersChange?.([
+        ...(data.keywordTriggers || []),
+        newTrigger
+      ]);
+      setNewKeyword("");
+      setNewResponse("");
+      setShowKeywordModal(false);
     }
   };
 
@@ -231,6 +257,84 @@ const MessageNode = ({ data }: MessageNodeProps) => {
                 </Tooltip>
               </TooltipProvider>
             ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowKeywordModal(true)}
+          className="w-full"
+        >
+          Add Action Trigger
+        </Button>
+      </div>
+
+      {data.keywordTriggers && data.keywordTriggers.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="text-sm font-medium">Action Triggers:</div>
+          {data.keywordTriggers.map((trigger, index) => (
+            <div
+              key={index}
+              className="p-2 bg-gray-50 rounded-md text-sm flex justify-between items-center"
+            >
+              <div>
+                <span className="font-medium">"{trigger.keyword}"</span>
+                <span className="mx-2">→</span>
+                <span>"{trigger.response}"</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const newTriggers = [...(data.keywordTriggers || [])];
+                  newTriggers.splice(index, 1);
+                  data.onKeywordTriggersChange?.(newTriggers);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showKeywordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[400px]">
+            <h3 className="text-lg font-semibold mb-4">Add Action Trigger</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Keyword</label>
+                <input
+                  type="text"
+                  value={newKeyword}
+                  onChange={(e) => setNewKeyword(e.target.value)}
+                  className="w-full mt-1 border rounded-md px-3 py-2"
+                  placeholder="e.g., YES, NO, STOP"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Response</label>
+                <Textarea
+                  value={newResponse}
+                  onChange={(e) => setNewResponse(e.target.value)}
+                  className="mt-1"
+                  placeholder="Auto-response message..."
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowKeywordModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={addKeywordTrigger}>Add Trigger</Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

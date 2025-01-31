@@ -28,10 +28,14 @@ const nodeTypes = {
   poll: PollNode,
 };
 
-const mockTags = [
-  { id: "1", name: "VIP" },
-  { id: "2", name: "New Customer" },
-  { id: "3", name: "Inactive" },
+const DEMOGRAPHIC_TAGS = [
+  { id: "age_18_24", name: "Age 18-24", segmentSize: 45 },
+  { id: "age_25_34", name: "Age 25-34", segmentSize: 65 },
+  { id: "age_35_plus", name: "Age 35+", segmentSize: 40 },
+  { id: "gender_male", name: "Male", segmentSize: 75 },
+  { id: "gender_female", name: "Female", segmentSize: 75 },
+  { id: "location_urban", name: "Urban", segmentSize: 90 },
+  { id: "location_rural", name: "Rural", segmentSize: 60 }
 ];
 
 const initialNodes: CustomNode[] = [
@@ -47,12 +51,10 @@ const initialNodes: CustomNode[] = [
   },
 ];
 
-const AREA_CODES = ["415", "628", "510"];
-
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
-  const [selectedAreaCode, setSelectedAreaCode] = useState(AREA_CODES[0]);
+  const [selectedAreaCode, setSelectedAreaCode] = useState("415");
   const { toast } = useToast();
 
   const onConnect = useCallback(
@@ -60,57 +62,49 @@ const Index = () => {
     [setEdges]
   );
 
-  const handleAudienceChange = useCallback((nodeId: string, audienceId: string) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const audienceMap: Record<string, { label: string; contacts: number }> = {
-            csv1: { label: "CSV Import 1", contacts: 150 },
-            csv2: { label: "CSV Import 2", contacts: 200 },
-            csv3: { label: "CSV Import 3", contacts: 300 },
-            csv4: { label: "CSV Import 4", contacts: 250 },
-          };
+  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number) => {
+    const parentNode = nodes.find(n => n.id === nodeId);
+    if (!parentNode) return;
 
+    const segmentNode: CustomNode = {
+      id: `segment-${Date.now()}`,
+      type: 'audience',
+      position: { 
+        x: parentNode.position.x, 
+        y: parentNode.position.y + 200 
+      },
+      data: {
+        label: `Segment: ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
+        contacts: segmentSize,
+        onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
+        onPollCreate: () => createPollNode(`segment-${Date.now()}`),
+      },
+    };
+
+    setNodes(nds => [...nds, segmentNode]);
+    setEdges(eds => [...eds, {
+      id: `e-${nodeId}-${segmentNode.id}`,
+      source: nodeId,
+      target: segmentNode.id,
+    }]);
+
+    // Update parent node's selected tags
+    setNodes(nds => 
+      nds.map(node => {
+        if (node.id === nodeId) {
+          const currentTags = node.data.selectedTags || [];
           return {
             ...node,
             data: {
               ...node.data,
-              label: audienceMap[audienceId].label,
-              contacts: audienceMap[audienceId].contacts,
+              selectedTags: [...currentTags, tagId],
             },
           };
         }
         return node;
       })
     );
-
-    toast({
-      title: "Audience Updated",
-      description: "The audience segment has been updated successfully.",
-    });
-  }, [setNodes, toast]);
-
-  const handleTagSelect = useCallback((nodeId: string, tagId: string) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const currentTags = node.data.selectedTags as string[] || [];
-          const newSelectedTags = currentTags.includes(tagId)
-            ? currentTags.filter((id) => id !== tagId)
-            : [...currentTags, tagId];
-          
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              selectedTags: newSelectedTags,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, [setNodes]);
+  }, [nodes, setNodes, setEdges]);
 
   const createMessageNode = useCallback((sourceId: string) => {
     const newNode: CustomNode = {
@@ -194,7 +188,7 @@ const Index = () => {
         ...node,
         data: {
           ...node.data,
-          onTagSelect: (tagId: string) => handleTagSelect(node.id, tagId),
+          onTagSelect: (tagId: string, segmentSize: number) => handleTagSelect(node.id, tagId, segmentSize),
           onMessageCreate: () => createMessageNode(node.id),
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceId: string) => handleAudienceChange(node.id, audienceId),
