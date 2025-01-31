@@ -71,6 +71,7 @@ const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<CustomNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>([]);
   const [selectedAreaCode, setSelectedAreaCode] = useState("415");
+  const [hasSelectedAudience, setHasSelectedAudience] = useState(false);
   const { toast } = useToast();
 
   const onConnect = useCallback(
@@ -182,6 +183,8 @@ const Index = () => {
           const totalContacts = AVAILABLE_AUDIENCES
             .filter(audience => audienceIds.includes(audience.id))
             .reduce((sum, audience) => sum + audience.contacts, 0);
+          
+          setHasSelectedAudience(audienceIds.length > 0);
           
           return {
             ...node,
@@ -315,6 +318,24 @@ const Index = () => {
               </TooltipContent>
             </Tooltip>
           </div>
+          {hasSelectedAudience && (
+            <div className="mt-2 flex items-center text-sm text-green-600">
+              <ChevronRight className="h-4 w-4 animate-bounce" />
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">Choose your next action</span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[250px]">
+                  <p>You can now:</p>
+                  <ul className="list-disc ml-4 mt-1">
+                    <li>Segment your audience by demographics</li>
+                    <li>Create a message to send</li>
+                    <li>Create a poll to gather feedback</li>
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </Panel>
         <Panel position="top-right" className="flex gap-2">
           <Button 
