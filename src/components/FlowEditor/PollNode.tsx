@@ -57,7 +57,7 @@ const PollNode = ({ data }: PollNodeProps) => {
   const { toast } = useToast();
 
   // Initialize options if empty
-  if (data.options.length === 0) {
+  if (!data.options || data.options.length === 0) {
     data.onOptionsChange(DEFAULT_OPTIONS);
   }
 
@@ -281,7 +281,7 @@ const PollNode = ({ data }: PollNodeProps) => {
           {data.options.map((option, index) => (
             <div key={option.id} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="min-w-[40px] text-gray-600 font-medium">
+                <span className="min-w-[40px] text-gray-400 font-medium">
                   {getOptionLabel(index)}
                 </span>
                 <div className="flex-1 bg-gray-50 rounded-lg p-3">
@@ -293,7 +293,7 @@ const PollNode = ({ data }: PollNodeProps) => {
                   />
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-2">
-                      <SmilePlus className="h-4 w-4 text-gray-400" />
+                      <SmilePlus className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" />
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch
