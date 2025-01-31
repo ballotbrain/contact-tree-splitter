@@ -47,6 +47,10 @@ export interface PollNodeData extends Record<string, unknown> {
   onQuestionChange: (question: string) => void;
   onOptionsChange: (options: PollOption[]) => void;
   onDelete?: () => void;
+  areaCode?: string;
+  onAreaCodeChange?: (code: string) => void;
+  scheduledTime?: Date;
+  onScheduleChange?: (date: Date) => void;
 }
 
 export type CustomNodeData = AudienceNodeData | MessageNodeData | SequenceNodeData | PollNodeData;
