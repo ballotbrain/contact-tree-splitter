@@ -82,6 +82,28 @@ const PollNode = ({ data }: PollNodeProps) => {
     data.onOptionsChange(updatedOptions);
   };
 
+  const addNewOption = () => {
+    const newOption: PollOption = {
+      id: `${Date.now()}`,
+      text: "",
+      leadsTo: "next"
+    };
+    data.onOptionsChange([...data.options, newOption]);
+  };
+
+  const deleteOption = (id: string) => {
+    if (data.options.length <= 1) {
+      toast({
+        title: "Cannot Delete",
+        description: "You must have at least one answer option",
+        variant: "destructive",
+      });
+      return;
+    }
+    const updatedOptions = data.options.filter(opt => opt.id !== id);
+    data.onOptionsChange(updatedOptions);
+  };
+
   return (
     <div className="flex gap-8">
       <div className="bg-white rounded-lg shadow-md p-4 min-w-[400px] border border-gray-200">
@@ -126,6 +148,8 @@ const PollNode = ({ data }: PollNodeProps) => {
         onLabelTypeChange={setLabelType}
         updateOption={updateOption}
         toggleOptionLeadsTo={toggleOptionLeadsTo}
+        onAddOption={addNewOption}
+        onDeleteOption={deleteOption}
       />
     </div>
   );

@@ -1,6 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { SmilePlus } from "lucide-react";
+import { SmilePlus, Plus, Trash2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PollOption } from "@/types/flow";
@@ -11,6 +12,8 @@ interface PollAnswersProps {
   onLabelTypeChange: (value: "numerical" | "alphabetical") => void;
   updateOption: (id: string, text: string) => void;
   toggleOptionLeadsTo: (id: string) => void;
+  onAddOption: () => void;
+  onDeleteOption: (id: string) => void;
 }
 
 export const PollAnswers = ({
@@ -19,6 +22,8 @@ export const PollAnswers = ({
   onLabelTypeChange,
   updateOption,
   toggleOptionLeadsTo,
+  onAddOption,
+  onDeleteOption,
 }: PollAnswersProps) => {
   const getOptionLabel = (index: number) => {
     if (labelType === "numerical") {
@@ -67,6 +72,14 @@ export const PollAnswers = ({
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-2">
                     <SmilePlus className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDeleteOption(option.id)}
+                      className="h-8 w-8 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
@@ -80,6 +93,16 @@ export const PollAnswers = ({
             </div>
           </div>
         ))}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onAddOption}
+          className="w-full mt-2"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Answer
+        </Button>
       </div>
     </div>
   );
