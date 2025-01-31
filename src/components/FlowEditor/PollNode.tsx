@@ -2,7 +2,7 @@ import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ListOrdered, Calendar, Clock } from "lucide-react";
+import { ListOrdered, Calendar, Clock, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { PollOption } from "@/types/flow";
 import {
@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PollNodeProps {
@@ -70,8 +71,15 @@ const PollNode = ({ data }: PollNodeProps) => {
     data.onOptionsChange(updatedOptions);
   };
 
+  const toggleOptionLeadsTo = (id: string) => {
+    const updatedOptions = data.options.map(opt =>
+      opt.id === id ? { ...opt, leadsTo: opt.leadsTo === "next" ? "complete" : "next" } : opt
+    );
+    data.onOptionsChange(updatedOptions);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
+    <div className="bg-white rounded-lg shadow-md p-4 min-w-[400px] border border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ListOrdered className="w-4 h-4 text-gray-600" />
@@ -131,18 +139,35 @@ const PollNode = ({ data }: PollNodeProps) => {
         className="mb-4"
       />
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {data.options.map((option, index) => (
-          <div key={option.id} className="flex items-center gap-2">
-            <Badge variant="outline" className="min-w-[24px] text-gray-500">
-              {index + 1}
-            </Badge>
-            <Textarea
-              value={option.text}
-              onChange={(e) => updateOption(option.id, e.target.value)}
-              placeholder={`Option ${index + 1}`}
-              className="flex-1"
-            />
+          <div key={option.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="min-w-[24px] text-gray-500">
+                {index + 1}
+              </Badge>
+              <Textarea
+                value={option.text}
+                onChange={(e) => updateOption(option.id, e.target.value)}
+                placeholder={`Option ${index + 1}`}
+                className="flex-1 bg-white"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => toggleOptionLeadsTo(option.id)}
+                className={option.leadsTo === "next" ? "text-blue-600" : "text-gray-400"}
+              >
+                <Clock className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 ml-8 text-sm text-gray-500">
+              <Switch
+                checked={option.leadsTo === "next"}
+                onCheckedChange={() => toggleOptionLeadsTo(option.id)}
+              />
+              <span>Continue to next question</span>
+            </div>
           </div>
         ))}
       </div>
