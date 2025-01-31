@@ -109,7 +109,9 @@ const PollNode = ({ data }: PollNodeProps) => {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ListOrdered className="w-4 h-4 text-gray-600" />
-          <span className="font-medium text-black">Poll Question</span>
+          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+            Poll Question 1
+          </Badge>
         </div>
         <div className="flex items-center gap-2">
           <select
@@ -203,9 +205,10 @@ const PollNode = ({ data }: PollNodeProps) => {
         </div>
       </div>
 
-      <div className="space-y-4 mt-4">
+      <div className="relative space-y-4 mt-4 pl-4 border-l-2 border-blue-100">
         {data.options.map((option, index) => (
-          <div key={option.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
+          <div key={option.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg relative">
+            <div className="absolute -left-[1.25rem] top-1/2 -translate-y-1/2 w-3 h-[2px] bg-blue-100" />
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="min-w-[24px] text-gray-500">
                 {index + 1}
