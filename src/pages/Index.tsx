@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send } from "lucide-react";
+import { Eye, Send, RefreshCcw } from "lucide-react";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
@@ -93,6 +93,15 @@ const Index = () => {
       !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
     ));
   }, [getChildNodes, setNodes, setEdges]);
+
+  const resetFlow = useCallback(() => {
+    setNodes(initialNodes);
+    setEdges([]);
+    toast({
+      title: "Flow Reset",
+      description: "The flow has been reset to its initial state",
+    });
+  }, [setNodes, setEdges, toast]);
 
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -244,6 +253,7 @@ const Index = () => {
           onMessageCreate: () => createMessageNode(node.id),
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),
+          onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
         },
       };
     }
@@ -290,6 +300,14 @@ const Index = () => {
           </p>
         </Panel>
         <Panel position="top-right" className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={resetFlow}
+            className="bg-white text-black border-gray-200 hover:bg-gray-50"
+          >
+            <RefreshCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
           <Button 
             variant="outline" 
             onClick={() => {

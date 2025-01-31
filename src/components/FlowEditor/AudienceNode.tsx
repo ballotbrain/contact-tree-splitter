@@ -1,7 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split } from "lucide-react";
+import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,11 +105,23 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        {(totalContacts > 0 || data.contacts) && (
-          <Badge variant="secondary" className="text-sm px-3">
-            {(data.contacts || totalContacts).toLocaleString()} contacts
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {(totalContacts > 0 || data.contacts) && (
+            <Badge variant="secondary" className="text-sm px-3">
+              {(data.contacts || totalContacts).toLocaleString()} contacts
+            </Badge>
+          )}
+          {data.onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={data.onDelete}
+              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
