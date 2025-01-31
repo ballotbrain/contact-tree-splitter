@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 
@@ -51,6 +53,7 @@ const PollNode = ({ data }: PollNodeProps) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [labelType, setLabelType] = useState<"numerical" | "alphabetical">("numerical");
   const { toast } = useToast();
 
   // Initialize options if empty
@@ -104,6 +107,14 @@ const PollNode = ({ data }: PollNodeProps) => {
       leadsTo: "next"
     };
     data.onOptionsChange([...data.options, newOption]);
+  };
+
+  const getOptionLabel = (index: number) => {
+    if (labelType === "numerical") {
+      return `${index + 1} =`;
+    } else {
+      return String.fromCharCode(65 + index) + " =";
+    }
   };
 
   return (
@@ -247,34 +258,52 @@ const PollNode = ({ data }: PollNodeProps) => {
 
       <div className="relative bg-white rounded-lg shadow-md p-4 border border-gray-200">
         <div className="absolute -left-8 top-1/2 w-8 h-[2px] bg-gray-200"></div>
+        
+        <div className="mb-4">
+          <Label className="text-sm font-medium">Label Type:</Label>
+          <RadioGroup
+            value={labelType}
+            onValueChange={(value) => setLabelType(value as "numerical" | "alphabetical")}
+            className="flex gap-4 mt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="numerical" id="numerical" />
+              <Label htmlFor="numerical">Numerical</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="alphabetical" id="alphabetical" />
+              <Label htmlFor="alphabetical">Alphabetical</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
         <div className="space-y-4">
           {data.options.map((option, index) => (
-            <div key={option.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg">
+            <div key={option.id} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="min-w-[24px] text-gray-500">
-                  {index + 1}
-                </Badge>
-                <Textarea
-                  value={option.text}
-                  onChange={(e) => updateOption(option.id, e.target.value)}
-                  placeholder={`Option ${index + 1}`}
-                  className="flex-1 bg-white"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => toggleOptionLeadsTo(option.id)}
-                  className={option.leadsTo === "next" ? "text-blue-600" : "text-gray-400"}
-                >
-                  <Clock className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2 ml-8 text-sm text-gray-500">
-                <Switch
-                  checked={option.leadsTo === "next"}
-                  onCheckedChange={() => toggleOptionLeadsTo(option.id)}
-                />
-                <span>Continue to next question</span>
+                <span className="min-w-[40px] text-gray-600 font-medium">
+                  {getOptionLabel(index)}
+                </span>
+                <div className="flex-1 bg-gray-50 rounded-lg p-3">
+                  <Textarea
+                    value={option.text}
+                    onChange={(e) => updateOption(option.id, e.target.value)}
+                    placeholder="Enter answer"
+                    className="bg-white border-0 focus-visible:ring-0"
+                  />
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <SmilePlus className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={option.leadsTo === "next"}
+                        onCheckedChange={() => toggleOptionLeadsTo(option.id)}
+                      />
+                      <span className="text-sm text-gray-500">Continue to next question</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -286,7 +315,7 @@ const PollNode = ({ data }: PollNodeProps) => {
             className="w-full mt-2"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Option
+            Add Answer
           </Button>
         </div>
       </div>
