@@ -135,7 +135,7 @@ const Index = () => {
       type: 'message',
       position: { 
         x: sourceNode.position.x, 
-        y: sourceNode.position.y + 250 // Increased vertical spacing
+        y: sourceNode.position.y + 250
       },
       data: {
         content: '',
@@ -148,13 +148,7 @@ const Index = () => {
             )
           );
         },
-        onDelete: () => {
-          setNodes(nds => nds.filter(node => node.id !== `message-${Date.now()}`));
-          setEdges(eds => eds.filter(edge => 
-            edge.source !== `message-${Date.now()}` && 
-            edge.target !== `message-${Date.now()}`
-          ));
-        },
+        onDelete: () => deleteNode(`message-${Date.now()}`),
       },
     };
 
@@ -164,7 +158,7 @@ const Index = () => {
       source: sourceId,
       target: newNode.id,
     }]);
-  }, [nodes, setNodes, setEdges]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
 
   const getChildNodes = (nodeId: string): string[] => {
     const childEdges = edges.filter(edge => edge.source === nodeId);
@@ -260,6 +254,7 @@ const Index = () => {
           ...node.data,
           areaCode: selectedAreaCode,
           onAreaCodeChange: setSelectedAreaCode,
+          onDelete: () => deleteNode(node.id),
         },
       };
     }

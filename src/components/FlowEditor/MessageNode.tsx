@@ -182,7 +182,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               variant="ghost"
               size="icon"
               onClick={data.onDelete}
-              className="h-8 w-8 text-gray-500 hover:text-red-600"
+              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
