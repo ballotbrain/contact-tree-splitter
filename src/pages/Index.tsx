@@ -28,14 +28,11 @@ const nodeTypes = {
   poll: PollNode,
 };
 
-const DEMOGRAPHIC_TAGS = [
-  { id: "age_18_24", name: "Age 18-24", segmentSize: 45 },
-  { id: "age_25_34", name: "Age 25-34", segmentSize: 65 },
-  { id: "age_35_plus", name: "Age 35+", segmentSize: 40 },
-  { id: "gender_male", name: "Male", segmentSize: 75 },
-  { id: "gender_female", name: "Female", segmentSize: 75 },
-  { id: "location_urban", name: "Urban", segmentSize: 90 },
-  { id: "location_rural", name: "Rural", segmentSize: 60 }
+const AVAILABLE_AUDIENCES = [
+  { id: "csv1", name: "CSV Import 1", contacts: 150 },
+  { id: "csv2", name: "CSV Import 2", contacts: 200 },
+  { id: "csv3", name: "CSV Import 3", contacts: 300 },
+  { id: "csv4", name: "CSV Import 4", contacts: 250 }
 ];
 
 const initialNodes: CustomNode[] = [
@@ -47,6 +44,8 @@ const initialNodes: CustomNode[] = [
       label: "HD40 Universe",
       contacts: 100,
       selectedTags: [],
+      onMessageCreate: () => {},
+      onPollCreate: () => {},
     },
   },
 ];
@@ -126,10 +125,16 @@ const Index = () => {
   }, [setNodes]);
 
   const createMessageNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
     const newNode: CustomNode = {
       id: `message-${Date.now()}`,
       type: 'message',
-      position: { x: nodes.find(n => n.id === sourceId)?.position.x || 0, y: (nodes.find(n => n.id === sourceId)?.position.y || 0) + 150 },
+      position: { 
+        x: sourceNode.position.x, 
+        y: sourceNode.position.y + 200 
+      },
       data: {
         content: '',
         onChange: (content: string) => {
@@ -143,6 +148,7 @@ const Index = () => {
         },
       },
     };
+
     setNodes(nds => [...nds, newNode]);
     setEdges(eds => [...eds, { 
       id: `e-${sourceId}-${newNode.id}`,
@@ -152,10 +158,16 @@ const Index = () => {
   }, [nodes, setNodes, setEdges]);
 
   const createPollNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
     const newNode: CustomNode = {
       id: `poll-${Date.now()}`,
       type: 'poll',
-      position: { x: nodes.find(n => n.id === sourceId)?.position.x || 0, y: (nodes.find(n => n.id === sourceId)?.position.y || 0) + 150 },
+      position: { 
+        x: sourceNode.position.x, 
+        y: sourceNode.position.y + 200 
+      },
       data: {
         question: '',
         options: [],
@@ -179,6 +191,7 @@ const Index = () => {
         },
       },
     };
+
     setNodes(nds => [...nds, newNode]);
     setEdges(eds => [...eds, { 
       id: `e-${sourceId}-${newNode.id}`,

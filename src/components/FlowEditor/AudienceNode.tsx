@@ -52,7 +52,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-600" />
-          <span className="font-semibold text-gray-900">HD40 Universe</span>
+          <span className="font-semibold text-gray-900">{data.label}</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
@@ -80,7 +80,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
         </Badge>
       </div>
 
-      <div className="mb-4">
+      <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="w-full">
@@ -103,6 +103,26 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full"
+          onClick={data.onMessageCreate}
+        >
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Add Message
+        </Button>
+
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full"
+          onClick={data.onPollCreate}
+        >
+          <ListOrdered className="w-4 h-4 mr-2" />
+          Add Poll
+        </Button>
       </div>
 
       <Handle

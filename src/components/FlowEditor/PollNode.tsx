@@ -23,7 +23,7 @@ const PollNode = ({ data }: PollNodeProps) => {
     const newOption: PollOption = {
       id: `option-${data.options.length + 1}`,
       text: "",
-      leadsTo: 'next' // Explicitly set as 'next' to match the PollOption type
+      leadsTo: 'next' as const // Explicitly set as literal type
     };
     data.onOptionsChange([...data.options, newOption]);
   };
