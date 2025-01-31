@@ -44,7 +44,7 @@ const initialNodes: CustomNode[] = [
     type: "audience",
     position: { x: 400, y: 100 },
     data: { 
-      label: "All Contacts",
+      label: "HD40 Universe",
       contacts: 100,
       selectedTags: [],
     },
@@ -88,16 +88,14 @@ const Index = () => {
       target: segmentNode.id,
     }]);
 
-    // Update parent node's selected tags
     setNodes(nds => 
       nds.map(node => {
-        if (node.id === nodeId) {
-          const currentTags = node.data.selectedTags || [];
+        if (node.id === nodeId && node.data.selectedTags) {
           return {
             ...node,
             data: {
               ...node.data,
-              selectedTags: [...currentTags, tagId],
+              selectedTags: [...node.data.selectedTags, tagId],
             },
           };
         }
@@ -105,6 +103,27 @@ const Index = () => {
       })
     );
   }, [nodes, setNodes, setEdges]);
+
+  const handleAudienceChange = useCallback((nodeId: string, audienceId: string) => {
+    const selectedAudience = AVAILABLE_AUDIENCES.find(a => a.id === audienceId);
+    if (!selectedAudience) return;
+
+    setNodes(nds =>
+      nds.map(node => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: selectedAudience.name,
+              contacts: selectedAudience.contacts,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [setNodes]);
 
   const createMessageNode = useCallback((sourceId: string) => {
     const newNode: CustomNode = {
