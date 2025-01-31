@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Zap } from "lucide-react";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
@@ -278,6 +278,8 @@ const Index = () => {
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),
           onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
+          actionTriggerIcon: <Zap className="h-4 w-4" />,
+          actionTriggerText: "Action",
         },
       };
     }
