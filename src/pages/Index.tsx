@@ -318,9 +318,9 @@ const Index = () => {
         <Background />
         <Controls />
         <Panel position="top-left" className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-black mb-1">Campaign Flow</h2>
+          <h2 className="text-xl font-semibold text-black mb-1">Flow Title</h2>
           <p className="text-sm text-gray-600">
-            Saved at {format(new Date(), "p 'on' PP")}
+            Auto-saved at {format(new Date(), "p 'on' PP")}
           </p>
           <div className="mt-3 flex items-center text-sm text-gray-900">
             <ChevronRight className="h-4 w-4 animate-bounce" />
@@ -354,8 +354,11 @@ const Index = () => {
         </Panel>
         <Panel position="top-right" className="flex gap-2">
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
-            <span className="text-sm text-gray-700">STOP Phrase:</span>
-            <Select value={stopPhrase} onValueChange={setStopPhrase}>
+            <span className="text-sm font-bold text-gray-700">STOP Phrase:</span>
+            <Select 
+              value={stopPhrase} 
+              onValueChange={(value: typeof STOP_PHRASES[number]) => setStopPhrase(value)}
+            >
               <SelectTrigger className="w-[200px] h-8">
                 <SelectValue />
               </SelectTrigger>
