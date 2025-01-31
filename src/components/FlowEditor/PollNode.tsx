@@ -1,11 +1,10 @@
 import { Handle, Position } from "@xyflow/react";
-import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { PollOption } from "@/types/flow";
 import { PollHeader } from "./Poll/PollHeader";
 import { PollQuestion } from "./Poll/PollQuestion";
 import { PollAnswers } from "./Poll/PollAnswers";
-import { format } from "date-fns";
+import { DEFAULT_OPTIONS, addNewOption, deleteOption, updateOption, toggleOptionLeadsTo } from "./Poll/PollOptionManager";
 
 interface PollNodeProps {
   data: {
@@ -23,12 +22,6 @@ interface PollNodeProps {
   };
 }
 
-const DEFAULT_OPTIONS: PollOption[] = [
-  { id: "1", text: "", leadsTo: "next" },
-  { id: "2", text: "", leadsTo: "next" },
-  { id: "3", text: "", leadsTo: "next" }
-];
-
 const MAX_CHARS = 500;
 
 const PollNode = ({ data }: PollNodeProps) => {
@@ -36,7 +29,6 @@ const PollNode = ({ data }: PollNodeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [labelType, setLabelType] = useState<"numerical" | "alphabetical">("numerical");
-  const { toast } = useToast();
 
   // Initialize options if empty
   if (!data.options || data.options.length === 0) {
@@ -48,10 +40,6 @@ const PollNode = ({ data }: PollNodeProps) => {
       setSelectedDate(date);
       data.onScheduleChange?.(date);
       setShowCalendar(false);
-      toast({
-        title: "Schedule Updated",
-        description: `Poll scheduled for ${format(date, "PPpp")}`,
-      });
     }
   };
 
@@ -62,46 +50,29 @@ const PollNode = ({ data }: PollNodeProps) => {
   };
 
   const handleMediaUpload = () => {
-    toast({
-      title: "Media Upload",
-      description: "Media upload functionality will be implemented here",
-    });
+    // Will be implemented later
   };
 
-  const updateOption = (id: string, text: string) => {
-    const updatedOptions = data.options.map(opt =>
-      opt.id === id ? { ...opt, text } : opt
-    );
+  const handleUpdateOption = (id: string, text: string) => {
+    const updatedOptions = updateOption(data.options, id, text);
     data.onOptionsChange(updatedOptions);
   };
 
-  const toggleOptionLeadsTo = (id: string) => {
-    const updatedOptions = data.options.map(opt =>
-      opt.id === id ? { ...opt, leadsTo: opt.leadsTo === "next" ? "complete" : "next" } : opt
-    ) as PollOption[];
+  const handleToggleOptionLeadsTo = (id: string) => {
+    const updatedOptions = toggleOptionLeadsTo(data.options, id);
     data.onOptionsChange(updatedOptions);
   };
 
-  const addNewOption = () => {
-    const newOption: PollOption = {
-      id: `${Date.now()}`,
-      text: "",
-      leadsTo: "next"
-    };
-    data.onOptionsChange([...data.options, newOption]);
+  const handleAddNewOption = () => {
+    const updatedOptions = addNewOption(data.options);
+    data.onOptionsChange(updatedOptions);
   };
 
-  const deleteOption = (id: string) => {
-    if (data.options.length <= 1) {
-      toast({
-        title: "Cannot Delete",
-        description: "You must have at least one answer option",
-        variant: "destructive",
-      });
-      return;
+  const handleDeleteOption = (id: string) => {
+    const updatedOptions = deleteOption(data.options, id);
+    if (updatedOptions) {
+      data.onOptionsChange(updatedOptions);
     }
-    const updatedOptions = data.options.filter(opt => opt.id !== id);
-    data.onOptionsChange(updatedOptions);
   };
 
   return (
@@ -146,10 +117,10 @@ const PollNode = ({ data }: PollNodeProps) => {
         options={data.options}
         labelType={labelType}
         onLabelTypeChange={setLabelType}
-        updateOption={updateOption}
-        toggleOptionLeadsTo={toggleOptionLeadsTo}
-        onAddOption={addNewOption}
-        onDeleteOption={deleteOption}
+        updateOption={handleUpdateOption}
+        toggleOptionLeadsTo={handleToggleOptionLeadsTo}
+        onAddOption={handleAddNewOption}
+        onDeleteOption={handleDeleteOption}
       />
     </div>
   );
