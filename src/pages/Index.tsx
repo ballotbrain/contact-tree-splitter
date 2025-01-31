@@ -307,25 +307,25 @@ const Index = () => {
           <p className="text-sm text-gray-600">
             Saved at {format(new Date(), "p 'on' PP")}
           </p>
-          <div className="mt-3 flex items-center text-sm text-blue-600">
+          <div className="mt-3 flex items-center text-sm text-gray-900">
             <ChevronRight className="h-4 w-4 animate-bounce" />
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <span className="cursor-help">Start by selecting your audience</span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[200px]">
+              <TooltipContent className="max-w-[200px] bg-[#222222] text-white border-gray-700">
                 <p>Click the dropdown in the audience node to choose your target audience</p>
               </TooltipContent>
             </Tooltip>
           </div>
           {hasSelectedAudience && (
-            <div className="mt-2 flex items-center text-sm text-green-600">
+            <div className="mt-2 flex items-center text-sm text-gray-900">
               <ChevronRight className="h-4 w-4 animate-bounce" />
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <span className="cursor-help">Choose your next action</span>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-[250px]">
+                <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
                   <p>You can now:</p>
                   <ul className="list-disc ml-4 mt-1">
                     <li>Segment your audience by demographics</li>

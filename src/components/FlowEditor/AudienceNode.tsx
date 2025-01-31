@@ -29,6 +29,7 @@ interface AudienceNodeProps {
     segmentCriteria?: string;
     onTagSelect?: (tagId: string, segmentSize: number, audienceName: string) => void;
     onAudienceChange?: (audienceIds: string[]) => void;
+    onDelete?: () => void;
   };
 }
 
