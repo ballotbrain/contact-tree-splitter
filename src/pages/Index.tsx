@@ -72,6 +72,62 @@ const Index = () => {
     [setEdges]
   );
 
+  const getChildNodes = useCallback((nodeId: string): string[] => {
+    const childEdges = edges.filter(edge => edge.source === nodeId);
+    const childIds = childEdges.map(edge => edge.target);
+    const descendantIds: string[] = [];
+    
+    childIds.forEach(childId => {
+      descendantIds.push(childId);
+      descendantIds.push(...getChildNodes(childId));
+    });
+    
+    return descendantIds;
+  }, [edges]);
+
+  const deleteNode = useCallback((nodeId: string) => {
+    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
+    
+    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
+    setEdges(eds => eds.filter(edge => 
+      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
+    ));
+  }, [getChildNodes, setNodes, setEdges]);
+
+  const createMessageNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
+    const newNode: CustomNode = {
+      id: `message-${Date.now()}`,
+      type: 'message',
+      position: { 
+        x: sourceNode.position.x, 
+        y: sourceNode.position.y + 250
+      },
+      data: {
+        content: '',
+        onChange: (content: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `message-${Date.now()}` 
+                ? { ...node, data: { ...node.data, content } }
+                : node
+            )
+          );
+        },
+        onDelete: () => deleteNode(`message-${Date.now()}`),
+      },
+    };
+
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
+
   const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, parentAudienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
     if (!parentNode) return;
@@ -125,62 +181,6 @@ const Index = () => {
       })
     );
   }, [setNodes]);
-
-  const createMessageNode = useCallback((sourceId: string) => {
-    const sourceNode = nodes.find(n => n.id === sourceId);
-    if (!sourceNode) return;
-
-    const newNode: CustomNode = {
-      id: `message-${Date.now()}`,
-      type: 'message',
-      position: { 
-        x: sourceNode.position.x, 
-        y: sourceNode.position.y + 250
-      },
-      data: {
-        content: '',
-        onChange: (content: string) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `message-${Date.now()}` 
-                ? { ...node, data: { ...node.data, content } }
-                : node
-            )
-          );
-        },
-        onDelete: () => deleteNode(`message-${Date.now()}`),
-      },
-    };
-
-    setNodes(nds => [...nds, newNode]);
-    setEdges(eds => [...eds, { 
-      id: `e-${sourceId}-${newNode.id}`,
-      source: sourceId,
-      target: newNode.id,
-    }]);
-  }, [nodes, setNodes, setEdges, deleteNode]);
-
-  const getChildNodes = (nodeId: string): string[] => {
-    const childEdges = edges.filter(edge => edge.source === nodeId);
-    const childIds = childEdges.map(edge => edge.target);
-    const descendantIds: string[] = [];
-    
-    childIds.forEach(childId => {
-      descendantIds.push(childId);
-      descendantIds.push(...getChildNodes(childId));
-    });
-    
-    return descendantIds;
-  };
-
-  const deleteNode = useCallback((nodeId: string) => {
-    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
-    
-    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
-    setEdges(eds => eds.filter(edge => 
-      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
-    ));
-  }, [edges, setNodes, setEdges]);
 
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
