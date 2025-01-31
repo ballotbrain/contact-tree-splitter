@@ -18,6 +18,7 @@ export interface AudienceNodeData extends Record<string, unknown> {
   selectedAudiences?: string[];
   parentAudience?: string;
   segmentCriteria?: string;
+  onDelete?: () => void;
 }
 
 export interface MessageNodeData extends Record<string, unknown> {

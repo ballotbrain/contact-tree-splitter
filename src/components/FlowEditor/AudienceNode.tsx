@@ -98,7 +98,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                 >
                   <span>{audience.name}</span>
                   <Badge variant="secondary" className="ml-2">
-                    {audience.contacts.toLocaleString()} contacts
+                    {audience.contacts.toLocaleString()} reachable contacts
                   </Badge>
                 </DropdownMenuCheckboxItem>
               ))}
@@ -108,7 +108,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
         <div className="flex items-center gap-2">
           {(totalContacts > 0 || data.contacts) && (
             <Badge variant="secondary" className="text-sm px-3">
-              {(data.contacts || totalContacts).toLocaleString()} contacts
+              {(data.contacts || totalContacts).toLocaleString()} reachable contacts
             </Badge>
           )}
           {data.onDelete && (
