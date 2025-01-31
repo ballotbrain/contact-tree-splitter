@@ -1,7 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Tag, MessageSquare, ListOrdered, Edit, Split } from "lucide-react";
+import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,9 @@ interface AudienceNodeProps {
     onPollCreate?: () => void;
     selectedTags?: string[];
     selectedAudiences?: string[];
-    onTagSelect?: (tagId: string, segmentSize: number) => void;
+    parentAudience?: string;
+    segmentCriteria?: string;
+    onTagSelect?: (tagId: string, segmentSize: number, audienceName: string) => void;
     onAudienceChange?: (audienceIds: string[]) => void;
   };
 }
@@ -62,18 +64,24 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
     })
     .join(", ");
 
+  const displayLabel = data.parentAudience && data.segmentCriteria
+    ? `${data.parentAudience} - ${data.segmentCriteria}`
+    : data.selectedAudiences?.length 
+      ? selectedAudienceNames 
+      : "Select Audience";
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-600" />
           <span className="font-semibold text-gray-900">
-            {data.selectedAudiences?.length ? selectedAudienceNames : "Select Audience"}
+            {displayLabel}
           </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
-                <Edit className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-4 w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -117,7 +125,12 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             {DEMOGRAPHIC_TAGS.map((tag) => (
               <DropdownMenuItem
                 key={tag.id}
-                onClick={() => data.onTagSelect?.(tag.id, tag.segmentSize)}
+                onClick={() => {
+                  const parentAudienceName = data.selectedAudiences?.length === 1
+                    ? AVAILABLE_AUDIENCES.find(a => a.id === data.selectedAudiences[0])?.name
+                    : selectedAudienceNames;
+                  data.onTagSelect?.(tag.id, tag.segmentSize, parentAudienceName || '');
+                }}
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center">

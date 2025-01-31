@@ -13,9 +13,11 @@ export interface AudienceNodeData extends Record<string, unknown> {
   onSegment?: () => void;
   onMessageCreate?: () => void;
   onPollCreate?: () => void;
-  onTagSelect?: (tagId: string, segmentSize: number) => void;
+  onTagSelect?: (tagId: string, segmentSize: number, audienceName: string) => void;
   onAudienceChange?: (audienceIds: string[]) => void;
   selectedAudiences?: string[];
+  parentAudience?: string;
+  segmentCriteria?: string;
 }
 
 export interface MessageNodeData extends Record<string, unknown> {
