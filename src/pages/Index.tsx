@@ -72,20 +72,24 @@ const Index = () => {
     [setEdges]
   );
 
-  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number) => {
+  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, parentAudienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
     if (!parentNode) return;
 
+    const tagName = DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name;
+    
     const segmentNode: CustomNode = {
       id: `segment-${Date.now()}`,
       type: 'audience',
       position: { 
         x: parentNode.position.x, 
-        y: parentNode.position.y + 250 // Increased vertical spacing
+        y: parentNode.position.y + 250
       },
       data: {
-        label: `Segment: ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
+        label: `${parentAudienceName} - ${tagName}`,
         contacts: segmentSize,
+        parentAudience: parentAudienceName,
+        segmentCriteria: tagName,
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
       },
@@ -96,6 +100,7 @@ const Index = () => {
       id: `e-${nodeId}-${segmentNode.id}`,
       source: nodeId,
       target: segmentNode.id,
+      type: 'smoothstep',
     }]);
   }, [nodes, setNodes, setEdges]);
 
@@ -203,7 +208,8 @@ const Index = () => {
         ...node,
         data: {
           ...node.data,
-          onTagSelect: (tagId: string, segmentSize: number) => handleTagSelect(node.id, tagId, segmentSize),
+          onTagSelect: (tagId: string, segmentSize: number, audienceName: string) => 
+            handleTagSelect(node.id, tagId, segmentSize, audienceName),
           onMessageCreate: () => createMessageNode(node.id),
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),

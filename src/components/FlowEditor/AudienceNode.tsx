@@ -57,7 +57,6 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
   const selectedAudienceNames = AVAILABLE_AUDIENCES
     .filter(audience => data.selectedAudiences?.includes(audience.id))
     .map(audience => {
-      // Abbreviate names longer than 15 characters
       return audience.name.length > 15 
         ? `${audience.name.substring(0, 12)}...` 
         : audience.name;
@@ -106,9 +105,9 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        {totalContacts > 0 && (
+        {(totalContacts > 0 || data.contacts) && (
           <Badge variant="secondary" className="text-sm px-3">
-            {totalContacts.toLocaleString()} contacts
+            {(data.contacts || totalContacts).toLocaleString()} contacts
           </Badge>
         )}
       </div>
@@ -166,6 +165,11 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
         </Button>
       </div>
 
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!bg-blue-500 !w-3 !h-3"
+      />
       <Handle
         type="source"
         position={Position.Bottom}
