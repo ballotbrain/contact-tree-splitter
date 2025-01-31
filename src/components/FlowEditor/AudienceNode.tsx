@@ -1,8 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Tag, MessageSquare, ListOrdered, Edit } from "lucide-react";
-import { useState } from "react";
+import { Users, Tag, MessageSquare, ListOrdered, Edit, Split } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,20 +29,20 @@ interface AudienceNodeProps {
 }
 
 const DEMOGRAPHIC_TAGS = [
-  { id: "age_18_24", name: "Age 18-24", segmentSize: 45 },
-  { id: "age_25_34", name: "Age 25-34", segmentSize: 65 },
-  { id: "age_35_plus", name: "Age 35+", segmentSize: 40 },
-  { id: "gender_male", name: "Male", segmentSize: 75 },
-  { id: "gender_female", name: "Female", segmentSize: 75 },
-  { id: "location_urban", name: "Urban", segmentSize: 90 },
-  { id: "location_rural", name: "Rural", segmentSize: 60 }
+  { id: "age_18_24", name: "Age 18-24", segmentSize: 15000 },
+  { id: "age_25_34", name: "Age 25-34", segmentSize: 25000 },
+  { id: "age_35_plus", name: "Age 35+", segmentSize: 30000 },
+  { id: "gender_male", name: "Male", segmentSize: 35000 },
+  { id: "gender_female", name: "Female", segmentSize: 35000 },
+  { id: "location_urban", name: "Urban", segmentSize: 40000 },
+  { id: "location_rural", name: "Rural", segmentSize: 30000 }
 ];
 
 const AVAILABLE_AUDIENCES = [
-  { id: "csv1", name: "CSV Import 1", contacts: 150 },
-  { id: "csv2", name: "CSV Import 2", contacts: 200 },
-  { id: "csv3", name: "CSV Import 3", contacts: 300 },
-  { id: "csv4", name: "CSV Import 4", contacts: 250 }
+  { id: "csv1", name: "CSV Import 1", contacts: 50000 },
+  { id: "csv2", name: "CSV Import 2", contacts: 75000 },
+  { id: "csv3", name: "CSV Import 3", contacts: 100000 },
+  { id: "csv4", name: "CSV Import 4", contacts: 85000 }
 ];
 
 const AudienceNode = ({ data }: AudienceNodeProps) => {
@@ -68,7 +67,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                 >
                   <span>{audience.name}</span>
                   <Badge variant="secondary" className="ml-2">
-                    {audience.contacts} contacts
+                    {audience.contacts.toLocaleString()} contacts
                   </Badge>
                 </DropdownMenuItem>
               ))}
@@ -76,7 +75,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           </DropdownMenu>
         </div>
         <Badge variant="secondary" className="text-sm px-3">
-          {data.contacts} contacts
+          {data.contacts.toLocaleString()} contacts
         </Badge>
       </div>
 
@@ -84,8 +83,8 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="w-full">
-              <Tag className="w-4 h-4 mr-2" />
-              Segment
+              <Split className="w-4 h-4 mr-2" />
+              Segment Audience
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
@@ -95,9 +94,12 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                 onClick={() => data.onTagSelect?.(tag.id, tag.segmentSize)}
                 className="flex items-center justify-between"
               >
-                {tag.name}
+                <div className="flex items-center">
+                  <Tag className="w-4 h-4 mr-2 text-gray-500" />
+                  {tag.name}
+                </div>
                 <Badge variant="secondary" className="ml-2">
-                  {tag.segmentSize} contacts
+                  {tag.segmentSize.toLocaleString()}
                 </Badge>
               </DropdownMenuItem>
             ))}
