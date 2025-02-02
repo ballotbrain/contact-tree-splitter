@@ -50,6 +50,16 @@ const AVAILABLE_AUDIENCES = [
   { id: "csv4", name: "CSV Import 4", contacts: 85000 }
 ];
 
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(1)}M`;
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(0)}K`;
+  }
+  return num.toString();
+};
+
 const AudienceNode = ({ data }: AudienceNodeProps) => {
   const totalContacts = AVAILABLE_AUDIENCES
     .filter(audience => data.selectedAudiences?.includes(audience.id))
@@ -84,7 +94,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-[280px]">
               {AVAILABLE_AUDIENCES.map((audience) => (
                 <DropdownMenuCheckboxItem
                   key={audience.id}
@@ -95,12 +105,14 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                       : (data.selectedAudiences || []).filter(id => id !== audience.id);
                     data.onAudienceChange?.(newSelection);
                   }}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between py-2"
                 >
-                  <span>{audience.name}</span>
-                  <Badge variant="secondary" className="ml-2">
-                    {audience.contacts.toLocaleString()} reachable contacts
-                  </Badge>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{audience.name}</span>
+                    <span className="text-sm text-gray-500">
+                      {formatNumber(audience.contacts)} contacts
+                    </span>
+                  </div>
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
@@ -109,7 +121,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
         <div className="flex items-center gap-2">
           {(totalContacts > 0 || data.contacts) && (
             <Badge variant="secondary" className="text-sm px-3">
-              {(data.contacts || totalContacts).toLocaleString()} reachable contacts
+              {formatNumber(data.contacts || totalContacts)} contacts
             </Badge>
           )}
           {data.onDelete && (
@@ -181,12 +193,12 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="!bg-blue-500 !w-3 !h-3"
+        className="!bg-gray-500 !w-3 !h-3"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-blue-500 !w-3 !h-3"
+        className="!bg-gray-500 !w-3 !h-3"
       />
     </div>
   );
