@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Toggle } from "@/components/ui/toggle";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
@@ -47,7 +47,12 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
   });
 
   const onSubmit = (data: ContactFormData) => {
-    setContacts(prev => [...prev, data]);
+    const newContact = {
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      phone: data.phone,
+    };
+    setContacts(prev => [...prev, newContact]);
     toast({
       title: "Contact Added",
       description: `${data.firstName} ${data.lastName} has been added to your preview list`,
@@ -167,33 +172,29 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
             {contacts.map((contact, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                onClick={() => toggleContact(contact.phone)}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="flex-1">
-                  <p className="font-medium">
-                    {contact.firstName} {contact.lastName}
-                  </p>
-                  <p className="text-sm text-gray-600">{contact.phone}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Toggle
-                    pressed={selectedContacts.includes(contact.phone)}
-                    onPressedChange={() => toggleContact(contact.phone)}
-                    className="data-[state=on]:bg-black"
+                <div className="flex items-center gap-3 flex-1">
+                  <Checkbox
+                    checked={selectedContacts.includes(contact.phone)}
+                    onCheckedChange={() => toggleContact(contact.phone)}
+                    className="border-black data-[state=checked]:bg-black data-[state=checked]:text-white"
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteContact(contact.phone);
-                    }}
-                    className="h-8 w-8 text-gray-500 hover:text-red-500"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div>
+                    <p className="font-medium">
+                      {contact.firstName} {contact.lastName}
+                    </p>
+                    <p className="text-sm text-gray-600">{contact.phone}</p>
+                  </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => deleteContact(contact.phone)}
+                  className="h-8 w-8 text-gray-500 hover:text-red-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             ))}
           </div>
