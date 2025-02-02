@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Plus } from "lucide-react";
 import PreviewDialog from "@/components/PreviewDialog";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
@@ -359,14 +359,6 @@ const Index = () => {
             <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
               <StopCircle className="h-4 w-4 text-[#ea384c]" /> Phrase:
             </span>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-gray-500 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
-                <p>This message is automatically appended to all messages for proper compliance</p>
-              </TooltipContent>
-            </Tooltip>
             <Select 
               value={stopPhrase} 
               onValueChange={(value: typeof STOP_PHRASES[number]) => setStopPhrase(value)}
@@ -386,7 +378,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             onClick={resetFlow}
-            className="bg-white text-black border-gray-200 hover:bg-gray-50"
+            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px]"
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Reset
@@ -394,7 +386,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             onClick={() => setPreviewOpen(true)}
-            className="bg-white text-black border-gray-200 hover:bg-gray-50"
+            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px]"
           >
             <Eye className="mr-2 h-4 w-4" />
             Preview
@@ -406,7 +398,7 @@ const Index = () => {
                 description: "Your flow has been submitted successfully",
               });
             }}
-            className="bg-black text-white hover:bg-gray-900"
+            className="bg-black text-white hover:bg-gray-900 w-[120px]"
           >
             <Send className="mr-2 h-4 w-4" />
             Submit
