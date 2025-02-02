@@ -47,12 +47,11 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
   });
 
   const onSubmit = (data: ContactFormData) => {
-    console.log("Preview sent to:", data);
+    setContacts(prev => [...prev, data]);
     toast({
-      title: "Preview Sent",
-      description: `Preview has been sent to ${data.phone}`,
+      title: "Contact Added",
+      description: `${data.firstName} ${data.lastName} has been added to your preview list`,
     });
-    setShowNewContactForm(false);
     form.reset();
   };
 
@@ -156,7 +155,7 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Save & Send</Button>
+                <Button type="submit">Add Contact</Button>
               </div>
             </form>
           </Form>
@@ -181,7 +180,7 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
                   <Toggle
                     pressed={selectedContacts.includes(contact.phone)}
                     onPressedChange={() => toggleContact(contact.phone)}
-                    className="data-[state=on]:bg-green-500"
+                    className="data-[state=on]:bg-black"
                   />
                   <Button
                     variant="ghost"
