@@ -9,7 +9,8 @@ import {
   Trash2,
   SmilePlus,
   Calendar,
-  Clock
+  Clock,
+  Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { 
@@ -269,9 +270,10 @@ const MessageNode = ({ data }: MessageNodeProps) => {
           variant="outline"
           size="sm"
           onClick={() => setShowKeywordModal(true)}
-          className="w-full"
+          className="w-full flex items-center justify-center gap-2"
         >
-          Add Action Trigger
+          <Zap className="h-4 w-4 text-black" />
+          Action Trigger
         </Button>
       </div>
 
