@@ -172,13 +172,18 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
             {contacts.map((contact, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => toggleContact(contact.phone)}
               >
                 <div className="flex items-center gap-3 flex-1">
                   <Checkbox
                     checked={selectedContacts.includes(contact.phone)}
-                    onCheckedChange={() => toggleContact(contact.phone)}
+                    onCheckedChange={(checked) => {
+                      // Prevent the card click from triggering twice
+                      checked !== 'indeterminate' && toggleContact(contact.phone);
+                    }}
                     className="border-black data-[state=checked]:bg-black data-[state=checked]:text-white"
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <div>
                     <p className="font-medium">
@@ -190,7 +195,10 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => deleteContact(contact.phone)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteContact(contact.phone);
+                  }}
                   className="h-8 w-8 text-gray-500 hover:text-red-500"
                 >
                   <Trash2 className="h-4 w-4" />
