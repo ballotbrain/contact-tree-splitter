@@ -101,7 +101,7 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
           className="w-full justify-start gap-2 mb-4"
         >
           <Plus className="h-4 w-4" />
-          Add Preview Contact
+          Preview Contact
         </Button>
 
         {showNewContactForm && (
