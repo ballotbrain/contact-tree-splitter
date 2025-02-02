@@ -1,7 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2 } from "lucide-react";
+import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2, CheckSquare, Square } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,13 +105,20 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                       : (data.selectedAudiences || []).filter(id => id !== audience.id);
                     data.onAudienceChange?.(newSelection);
                   }}
-                  className="flex items-center justify-between py-2"
+                  className="flex items-center justify-between py-2 px-3"
                 >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{audience.name}</span>
-                    <span className="text-sm text-gray-500">
-                      {formatNumber(audience.contacts)} contacts
-                    </span>
+                  <div className="flex items-center gap-3">
+                    {data.selectedAudiences?.includes(audience.id) ? (
+                      <CheckSquare className="h-4 w-4 text-black" />
+                    ) : (
+                      <Square className="h-4 w-4 text-gray-400" />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{audience.name}</span>
+                      <span className="text-sm text-gray-500">
+                        {formatNumber(audience.contacts)} contacts
+                      </span>
+                    </div>
                   </div>
                 </DropdownMenuCheckboxItem>
               ))}
