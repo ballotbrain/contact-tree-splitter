@@ -105,12 +105,12 @@ const PollNode = ({ data }: PollNodeProps) => {
         <Handle
           type="target"
           position={Position.Top}
-          className="!bg-blue-500 !w-3 !h-3"
+          className="!bg-black !w-3 !h-3"
         />
         <Handle
           type="source"
           position={Position.Bottom}
-          className="!bg-blue-500 !w-3 !h-3"
+          className="!bg-black !w-3 !h-3"
         />
       </div>
 

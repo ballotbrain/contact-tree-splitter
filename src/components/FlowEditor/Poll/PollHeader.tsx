@@ -42,7 +42,7 @@ export const PollHeader = ({
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         <ListOrdered className="w-4 h-4 text-gray-600" />
-        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
           Poll Question {questionNumber || 1}
         </Badge>
       </div>
@@ -63,7 +63,7 @@ export const PollHeader = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-gray-500 hover:text-blue-600"
+              className="h-8 w-8 text-gray-500 hover:text-gray-700"
             >
               {selectedDate ? (
                 <TooltipProvider>
