@@ -160,7 +160,7 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Add Contact</Button>
+                <Button type="submit" className="bg-black hover:bg-gray-900">Add Contact</Button>
               </div>
             </form>
           </Form>
@@ -220,6 +220,7 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
             type="button"
             onClick={handleSendPreviews}
             disabled={selectedContacts.length === 0}
+            className="bg-black hover:bg-gray-900"
           >
             Send Previews ({selectedContacts.length})
           </Button>
