@@ -84,7 +84,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
   return (
     <div className={cn(
       "rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100",
-      data.parentAudience ? "bg-[#F1F0FB]" : "bg-white"
+      data.parentAudience ? "bg-[#e5e5e5]" : "bg-white"
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
