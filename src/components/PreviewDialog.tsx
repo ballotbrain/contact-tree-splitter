@@ -6,7 +6,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -35,6 +35,7 @@ const previousContacts = [
 const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
   const [showNewContactForm, setShowNewContactForm] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [contacts, setContacts] = useState(previousContacts);
   const { toast } = useToast();
   const form = useForm<ContactFormData>({
     resolver: zodResolver(formSchema),
@@ -77,6 +78,15 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
         ? prev.filter(p => p !== phone)
         : [...prev, phone]
     );
+  };
+
+  const deleteContact = (phone: string) => {
+    setContacts(prev => prev.filter(contact => contact.phone !== phone));
+    setSelectedContacts(prev => prev.filter(p => p !== phone));
+    toast({
+      title: "Contact Deleted",
+      description: "The contact has been removed from your preview list",
+    });
   };
 
   return (
@@ -155,10 +165,11 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
         <div className="space-y-2">
           <h3 className="font-semibold">Preview Contacts:</h3>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
-            {previousContacts.map((contact, index) => (
+            {contacts.map((contact, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => toggleContact(contact.phone)}
               >
                 <div className="flex-1">
                   <p className="font-medium">
@@ -166,11 +177,24 @@ const PreviewDialog = ({ open, onOpenChange }: PreviewDialogProps) => {
                   </p>
                   <p className="text-sm text-gray-600">{contact.phone}</p>
                 </div>
-                <Toggle
-                  pressed={selectedContacts.includes(contact.phone)}
-                  onPressedChange={() => toggleContact(contact.phone)}
-                  className="data-[state=on]:bg-green-500"
-                />
+                <div className="flex items-center gap-2">
+                  <Toggle
+                    pressed={selectedContacts.includes(contact.phone)}
+                    onPressedChange={() => toggleContact(contact.phone)}
+                    className="data-[state=on]:bg-green-500"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteContact(contact.phone);
+                    }}
+                    className="h-8 w-8 text-gray-500 hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
