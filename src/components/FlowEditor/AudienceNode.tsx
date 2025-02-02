@@ -2,6 +2,7 @@ import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2, CheckSquare, Square } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
