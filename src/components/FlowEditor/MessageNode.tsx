@@ -124,7 +124,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
+    <div className="bg-[#f5f5f5] rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-gray-600" />
