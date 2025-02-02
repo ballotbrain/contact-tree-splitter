@@ -355,7 +355,7 @@ const Index = () => {
           )}
         </Panel>
         <Panel position="top-right" className="flex gap-2">
-          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 bg-white px-3 rounded-lg border border-gray-200 h-10">
             <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
               <StopCircle className="h-4 w-4 text-[#ea384c]" /> Phrase:
             </span>
@@ -363,7 +363,7 @@ const Index = () => {
               value={stopPhrase} 
               onValueChange={(value: typeof STOP_PHRASES[number]) => setStopPhrase(value)}
             >
-              <SelectTrigger className="w-[200px] h-8">
+              <SelectTrigger className="w-[200px] border-0 h-8 focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -378,7 +378,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             onClick={resetFlow}
-            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px]"
+            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px] h-10"
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Reset
@@ -386,7 +386,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             onClick={() => setPreviewOpen(true)}
-            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px]"
+            className="bg-white text-black border-gray-200 hover:bg-gray-50 w-[120px] h-10"
           >
             <Eye className="mr-2 h-4 w-4" />
             Preview
@@ -398,7 +398,7 @@ const Index = () => {
                 description: "Your flow has been submitted successfully",
               });
             }}
-            className="bg-black text-white hover:bg-gray-900 w-[120px]"
+            className="bg-black text-white hover:bg-gray-900 w-[120px] h-10"
           >
             <Send className="mr-2 h-4 w-4" />
             Submit
