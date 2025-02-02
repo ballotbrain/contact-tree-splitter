@@ -12,6 +12,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
 import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle } from "lucide-react";
+import PreviewDialog from "@/components/PreviewDialog";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
 import MessageNode from "@/components/FlowEditor/MessageNode";
@@ -87,6 +88,7 @@ const Index = () => {
   const [selectedAreaCode, setSelectedAreaCode] = useState("415");
   const [hasSelectedAudience, setHasSelectedAudience] = useState(false);
   const [stopPhrase, setStopPhrase] = useState<typeof STOP_PHRASES[number]>(STOP_PHRASES[0]);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
 
   const onConnect = useCallback(
@@ -355,7 +357,7 @@ const Index = () => {
         <Panel position="top-right" className="flex gap-2">
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
             <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
-              <StopCircle className="h-4 w-4" /> Phrase:
+              <StopCircle className="h-4 w-4 text-[#ea384c]" /> Phrase:
             </span>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -391,12 +393,7 @@ const Index = () => {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => {
-              toast({
-                title: "Preview Mode",
-                description: "Preview functionality will be implemented here",
-              });
-            }}
+            onClick={() => setPreviewOpen(true)}
             className="bg-white text-black border-gray-200 hover:bg-gray-50"
           >
             <Eye className="mr-2 h-4 w-4" />
@@ -416,6 +413,7 @@ const Index = () => {
           </Button>
         </Panel>
       </ReactFlow>
+      <PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} />
     </div>
   );
 };
