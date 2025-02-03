@@ -219,10 +219,10 @@ const MessageNode = ({ data }: MessageNodeProps) => {
             }
           }}
           placeholder="Type your message here..."
-          className="min-h-[120px] resize-y w-full p-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 mb-1 text-base leading-relaxed bg-white"
+          className="min-h-[120px] resize-y w-full p-3 rounded-lg border border-gray-300 focus:border-black focus:ring-1 focus:ring-black transition-all duration-200 mb-1 text-base leading-relaxed bg-white"
           style={{ 
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            caretColor: '#2563eb'
+            caretColor: '#000000'
           }}
         />
         
@@ -403,12 +403,12 @@ const MessageNode = ({ data }: MessageNodeProps) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="!bg-blue-500 !w-3 !h-3"
+        className="!bg-black !w-3 !h-3"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-blue-500 !w-3 !h-3"
+        className="!bg-black !w-3 !h-3"
       />
     </div>
   );

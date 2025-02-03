@@ -84,11 +84,11 @@
 }
 
 .react-flow__handle:hover {
-  @apply bg-neutral-600;
+  @apply bg-neutral-900;
 }
 
 .react-flow__edge-path {
-  @apply stroke-2;
+  @apply stroke-2 stroke-black;
 }
 
 .react-flow__controls {
