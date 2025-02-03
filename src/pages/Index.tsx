@@ -53,10 +53,10 @@ const DEMOGRAPHIC_TAGS = [
 ];
 
 const AVAILABLE_AUDIENCES = [
-  { id: "csv1", name: "CSV Import 1", contacts: 50000 },
-  { id: "csv2", name: "CSV Import 2", contacts: 75000 },
-  { id: "csv3", name: "CSV Import 3", contacts: 100000 },
-  { id: "csv4", name: "CSV Import 4", contacts: 85000 }
+  { id: "csv1", name: "Import 1", contacts: 50000 },
+  { id: "csv2", name: "Import 2", contacts: 75000 },
+  { id: "csv3", name: "Import 3", contacts: 100000 },
+  { id: "csv4", name: "Import 4", contacts: 85000 }
 ];
 
 const STOP_PHRASES = [
@@ -125,131 +125,6 @@ const Index = () => {
     ));
   }, [getChildNodes, setNodes, setEdges]);
 
-  const createPollNode = useCallback((sourceId: string) => {
-    const sourceNode = nodes.find(n => n.id === sourceId);
-    if (!sourceNode) return;
-
-    const existingPollNodes = nodes.filter(n => n.type === 'poll');
-    const questionNumber = existingPollNodes.length + 1;
-
-    const newPosition = {
-      x: sourceNode.position.x,
-      y: sourceNode.position.y + 250
-    };
-
-    const newNode: CustomNode = {
-      id: `poll-${Date.now()}`,
-      type: 'poll',
-      position: newPosition,
-      data: {
-        question: '',
-        options: [],
-        questionNumber,
-        onQuestionChange: (question: string) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `poll-${Date.now()}`
-                ? { ...node, data: { ...node.data, question } }
-                : node
-            )
-          );
-        },
-        onOptionsChange: (options: any[]) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `poll-${Date.now()}`
-                ? { ...node, data: { ...node.data, options } }
-                : node
-            )
-          );
-        },
-        onDelete: () => deleteNode(`poll-${Date.now()}`),
-        areaCode: selectedAreaCode,
-        onAreaCodeChange: setSelectedAreaCode,
-        onAddNextQuestion: () => {
-          createPollNode(`poll-${Date.now()}`);
-        },
-      },
-    };
-
-    setNodes(nds => [...nds, newNode]);
-    setEdges(eds => [...eds, { 
-      id: `e-${sourceId}-${newNode.id}`,
-      source: sourceId,
-      target: newNode.id,
-      type: 'smoothstep',
-    }]);
-  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
-
-  const createMessageNode = useCallback((sourceId: string) => {
-    const sourceNode = nodes.find(n => n.id === sourceId);
-    if (!sourceNode) return;
-
-    const newNode: CustomNode = {
-      id: `message-${Date.now()}`,
-      type: 'message',
-      position: { 
-        x: sourceNode.position.x, 
-        y: sourceNode.position.y + 250
-      },
-      data: {
-        content: '',
-        onChange: (content: string) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `message-${Date.now()}` 
-                ? { ...node, data: { ...node.data, content } }
-                : node
-            )
-          );
-        },
-        onDelete: () => deleteNode(`message-${Date.now()}`),
-      },
-    };
-
-    setNodes(nds => [...nds, newNode]);
-    setEdges(eds => [...eds, { 
-      id: `e-${sourceId}-${newNode.id}`,
-      source: sourceId,
-      target: newNode.id,
-    }]);
-  }, [nodes, setNodes, setEdges, deleteNode]);
-
-  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
-    const parentNode = nodes.find(n => n.id === nodeId);
-    if (!parentNode) return;
-
-    const segmentNode: CustomNode = {
-      id: `segment-${Date.now()}`,
-      type: 'audience',
-      position: { 
-        x: parentNode.position.x, 
-        y: parentNode.position.y + 250
-      },
-      data: {
-        label: `${audienceName} - ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
-        contacts: segmentSize,
-        parentAudience: audienceName,
-        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name,
-        selectedAudiences: parentNode.data.selectedAudiences,
-        selectedTags: [],
-        onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
-        onPollCreate: () => createPollNode(`segment-${Date.now()}`),
-        onSegment: () => {},
-        onDelete: () => deleteNode(`segment-${Date.now()}`),
-        onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
-      },
-    };
-
-    setNodes(nds => [...nds, segmentNode]);
-    setEdges(eds => [...eds, {
-      id: `e-${nodeId}-${segmentNode.id}`,
-      source: nodeId,
-      target: segmentNode.id,
-      type: 'smoothstep',
-    }]);
-  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, deleteNode, handleAudienceChange]);
-
   const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
     setNodes(nds =>
       nds.map(node => {
@@ -301,7 +176,130 @@ const Index = () => {
         return node;
       })
     );
-  }, [setNodes, handleTagSelect, createMessageNode, createPollNode, deleteNode]);
+  }, [setNodes, createMessageNode, createPollNode, deleteNode]);
+
+  const createMessageNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
+    const newNode: CustomNode = {
+      id: `message-${Date.now()}`,
+      type: 'message',
+      position: { 
+        x: sourceNode.position.x, 
+        y: sourceNode.position.y + 250
+      },
+      data: {
+        content: '',
+        onChange: (content: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `message-${Date.now()}` 
+                ? { ...node, data: { ...node.data, content } }
+                : node
+            )
+          );
+        },
+        onDelete: () => deleteNode(`message-${Date.now()}`),
+      },
+    };
+
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
+
+  const createPollNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
+    const existingPollNodes = nodes.filter(n => n.type === 'poll');
+    const questionNumber = existingPollNodes.length + 1;
+
+    const newNode: CustomNode = {
+      id: `poll-${Date.now()}`,
+      type: 'poll',
+      position: {
+        x: sourceNode.position.x,
+        y: sourceNode.position.y + 250
+      },
+      data: {
+        question: '',
+        options: [],
+        questionNumber,
+        onQuestionChange: (question: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, question } }
+                : node
+            )
+          );
+        },
+        onOptionsChange: (options: any[]) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, options } }
+                : node
+            )
+          );
+        },
+        onDelete: () => deleteNode(`poll-${Date.now()}`),
+        areaCode: selectedAreaCode,
+        onAreaCodeChange: setSelectedAreaCode,
+        onAddNextQuestion: () => {
+          createPollNode(`poll-${Date.now()}`);
+        },
+      },
+    };
+
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+      type: 'smoothstep',
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
+
+  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
+    const parentNode = nodes.find(n => n.id === nodeId);
+    if (!parentNode) return;
+
+    const segmentNode: CustomNode = {
+      id: `segment-${Date.now()}`,
+      type: 'audience',
+      position: {
+        x: parentNode.position.x,
+        y: parentNode.position.y + 250
+      },
+      data: {
+        label: `${audienceName} - ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
+        contacts: segmentSize,
+        parentAudience: audienceName,
+        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name,
+        selectedAudiences: parentNode.data.selectedAudiences,
+        selectedTags: [],
+        onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
+        onPollCreate: () => createPollNode(`segment-${Date.now()}`),
+        onSegment: () => {},
+        onDelete: () => deleteNode(`segment-${Date.now()}`),
+        onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
+      },
+    };
+
+    setNodes(nds => [...nds, segmentNode]);
+    setEdges(eds => [...eds, {
+      id: `e-${nodeId}-${segmentNode.id}`,
+      source: nodeId,
+      target: segmentNode.id,
+      type: 'smoothstep',
+    }]);
+  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, deleteNode, handleAudienceChange]);
 
   const calculateTotalCost = useCallback(() => {
     const messageNodes = nodes.filter(node => node.type === 'message');
