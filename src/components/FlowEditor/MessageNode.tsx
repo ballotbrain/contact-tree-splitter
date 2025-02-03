@@ -12,7 +12,8 @@ import {
   Clock,
   Zap,
   Phone,
-  Trash
+  Trash,
+  Plus
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { 
@@ -241,15 +242,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
                 />
               </PopoverContent>
             </Popover>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleMediaUpload}
-              className="h-8 w-8"
-            >
-              <ImageIcon className="h-4 w-4" />
-            </Button>
           </div>
           
           <span>
@@ -290,6 +282,13 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               )}
             </div>
           ))}
+          {/* Add Media Button */}
+          <div 
+            onClick={handleMediaUpload}
+            className="relative cursor-pointer group border-2 border-dashed border-gray-300 rounded-md h-20 flex items-center justify-center hover:border-gray-400 transition-colors"
+          >
+            <Plus className="w-6 h-6 text-gray-400 group-hover:text-gray-500" />
+          </div>
         </div>
       </div>
 

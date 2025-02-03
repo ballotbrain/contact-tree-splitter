@@ -168,9 +168,9 @@ const Index = () => {
       mmsImageCount: formatNumber(mmsImageCount),
       mmsVideoCount: formatNumber(mmsVideoCount),
       breakdown: {
-        sms: (Number(smsCount) > 0 ? `SMS (${formatNumber(smsCount)}): $${(smsCount * 0.03).toFixed(2)}` : null),
-        mmsImage: (Number(mmsImageCount) > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
-        mmsVideo: (Number(mmsVideoCount) > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
+        sms: (Number(smsCount) > 0 ? `SMS (${formatNumber(smsCount)}): $${(Number(smsCount) * 0.03).toFixed(2)}` : null),
+        mmsImage: (Number(mmsImageCount) > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(Number(mmsImageCount) * 0.06).toFixed(2)}` : null),
+        mmsVideo: (Number(mmsVideoCount) > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(Number(mmsVideoCount) * 0.065).toFixed(2)}` : null)
       }
     };
   }, [nodes, edges]);
