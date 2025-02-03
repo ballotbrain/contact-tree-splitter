@@ -274,13 +274,15 @@ const Index = () => {
     const existingPollNodes = nodes.filter(n => n.type === 'poll');
     const questionNumber = existingPollNodes.length + 1;
 
+    const newPosition = {
+      x: sourceNode.position.x,
+      y: sourceNode.position.y + 250 // Add some vertical spacing
+    };
+
     const newNode: CustomNode = {
       id: `poll-${Date.now()}`,
       type: 'poll',
-      position: { 
-        x: sourceNode.position.x, 
-        y: sourceNode.position.y + 250
-      },
+      position: newPosition,
       data: {
         question: '',
         options: [],
@@ -304,7 +306,10 @@ const Index = () => {
           );
         },
         onDelete: () => deleteNode(`poll-${Date.now()}`),
+        areaCode: selectedAreaCode,
+        onAreaCodeChange: setSelectedAreaCode,
         onAddNextQuestion: () => {
+          // This will create the next poll question in the chain
           createPollNode(`poll-${Date.now()}`);
         },
       },
@@ -315,8 +320,9 @@ const Index = () => {
       id: `e-${sourceId}-${newNode.id}`,
       source: sourceId,
       target: newNode.id,
+      type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, deleteNode]);
+  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
@@ -349,7 +355,10 @@ const Index = () => {
         ...node,
         data: {
           ...node.data,
+          areaCode: selectedAreaCode,
+          onAreaCodeChange: setSelectedAreaCode,
           onDelete: () => deleteNode(node.id),
+          onAddNextQuestion: () => createPollNode(node.id),
         },
       };
     }
