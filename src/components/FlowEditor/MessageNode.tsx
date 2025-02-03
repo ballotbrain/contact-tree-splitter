@@ -12,7 +12,7 @@ import {
   Clock,
   Zap,
   Phone,
-  Trash,
+  Trash2,
   Plus
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -197,6 +197,25 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               ))}
             </select>
           </div>
+          <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+              >
+                <Calendar className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
           {data.onDelete && (
             <Button
               variant="ghost"
@@ -204,7 +223,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               onClick={data.onDelete}
               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
-              <Trash className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
