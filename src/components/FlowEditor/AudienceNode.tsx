@@ -81,6 +81,8 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
       ? selectedAudienceNames 
       : "Select Audience";
 
+  const hasSelectedAudience = data.selectedAudiences && data.selectedAudiences.length > 0;
+
   return (
     <div className={cn(
       "rounded-lg shadow-lg p-6 min-w-[280px] border border-gray-100",
@@ -129,56 +131,36 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="flex items-center gap-2">
-          {(totalContacts > 0 || data.contacts) && (
+        {hasSelectedAudience && (
+          <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-sm px-3">
               {formatNumber(data.contacts || totalContacts)} contacts
             </Badge>
-          )}
-          {data.onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={data.onDelete}
-              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+            {data.onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={data.onDelete}
+                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full">
-              <Split className="w-4 h-4 mr-2" />
-              Segment Audience
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            {DEMOGRAPHIC_TAGS.map((tag) => (
-              <DropdownMenuItem
-                key={tag.id}
-                onClick={() => {
-                  const parentAudienceName = data.selectedAudiences?.length === 1
-                    ? AVAILABLE_AUDIENCES.find(a => a.id === data.selectedAudiences[0])?.name
-                    : selectedAudienceNames;
-                  data.onTagSelect?.(tag.id, tag.segmentSize, parentAudienceName || '');
-                }}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center">
-                  <Tag className="w-4 h-4 mr-2 text-gray-500" />
-                  {tag.name}
-                </div>
-                <Badge variant="secondary" className="ml-2">
-                  {tag.segmentSize.toLocaleString()}
-                </Badge>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full"
+          onClick={data.onSegment}
+          disabled={!hasSelectedAudience}
+        >
+          <Split className="w-4 h-4 mr-2" />
+          Segment Audience
+        </Button>
 
         <div className="relative py-4">
           <div className="absolute inset-0 flex items-center">
@@ -196,6 +178,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           size="sm" 
           className="w-full"
           onClick={data.onMessageCreate}
+          disabled={!hasSelectedAudience}
         >
           <MessageSquare className="w-4 h-4 mr-2" />
           Message
@@ -206,6 +189,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           size="sm" 
           className="w-full"
           onClick={data.onPollCreate}
+          disabled={!hasSelectedAudience}
         >
           <ListOrdered className="w-4 h-4 mr-2" />
           Poll
