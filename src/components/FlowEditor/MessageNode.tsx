@@ -117,6 +117,19 @@ const MessageNode = ({ data }: MessageNodeProps) => {
     });
   };
 
+  const removeMedia = () => {
+    // Remove media tag from content
+    const newContent = data.content.replace(/\n\[(Video|Media)\]:.*$/g, '');
+    data.onChange(newContent);
+    setSelectedMedia(null);
+    setMessageType('SMS');
+    
+    toast({
+      title: "Media Removed",
+      description: "Message converted back to SMS",
+    });
+  };
+
   const enableLinkTracking = (link: string) => {
     // Replace the regular link with a tracked version
     const trackedLink = `https://track.your-domain.com/?url=${encodeURIComponent(link)}`;
@@ -166,6 +179,16 @@ const MessageNode = ({ data }: MessageNodeProps) => {
           <Badge variant="secondary" className="text-xs">
             {messageType}
           </Badge>
+          {selectedMedia && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={removeMedia}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 p-1 h-6"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-sm border border-gray-200 rounded px-2 py-1 bg-white text-black">
@@ -284,7 +307,9 @@ const MessageNode = ({ data }: MessageNodeProps) => {
             <div
               key={index}
               onClick={() => handleMediaSelect(media)}
-              className="relative cursor-pointer group"
+              className={`relative cursor-pointer group ${
+                selectedMedia === media.url ? 'ring-2 ring-blue-500' : ''
+              }`}
             >
               <img
                 src={media.thumbnail}

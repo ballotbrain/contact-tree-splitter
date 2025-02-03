@@ -150,13 +150,13 @@ const Index = () => {
 
       if (hasVideo) {
         mmsVideoCount++;
-        totalCost += Number(contacts) * 0.065; // $0.065 per video MMS
+        totalCost += contacts * 0.065; // $0.065 per video MMS
       } else if (hasImage) {
         mmsImageCount++;
-        totalCost += Number(contacts) * 0.06; // $0.06 per image MMS
+        totalCost += contacts * 0.06; // $0.06 per image MMS
       } else {
         smsCount++;
-        totalCost += Number(contacts) * 0.03; // $0.03 per SMS
+        totalCost += contacts * 0.03; // $0.03 per SMS
       }
     });
 
@@ -166,9 +166,9 @@ const Index = () => {
       mmsImageCount,
       mmsVideoCount,
       breakdown: {
-        sms: (smsCount > 0 ? `SMS (${smsCount}): $${(totalCost * (smsCount / (smsCount + mmsImageCount + mmsVideoCount))).toFixed(2)}` : null),
-        mmsImage: (mmsImageCount > 0 ? `Image MMS (${mmsImageCount}): $${(totalCost * (mmsImageCount / (smsCount + mmsImageCount + mmsVideoCount))).toFixed(2)}` : null),
-        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${mmsVideoCount}): $${(totalCost * (mmsVideoCount / (smsCount + mmsImageCount + mmsVideoCount))).toFixed(2)}` : null)
+        sms: (smsCount > 0 ? `SMS (${smsCount}): $${(smsCount * 0.03).toFixed(2)}` : null),
+        mmsImage: (mmsImageCount > 0 ? `Image MMS (${mmsImageCount}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
+        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${mmsVideoCount}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
       }
     };
   }, [nodes, edges]);
