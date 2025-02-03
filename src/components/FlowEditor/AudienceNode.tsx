@@ -46,10 +46,10 @@ const DEMOGRAPHIC_TAGS = [
 ];
 
 const AVAILABLE_AUDIENCES = [
-  { id: "csv1", name: "CSV Import 1", contacts: 50000 },
-  { id: "csv2", name: "CSV Import 2", contacts: 75000 },
-  { id: "csv3", name: "CSV Import 3", contacts: 100000 },
-  { id: "csv4", name: "CSV Import 4", contacts: 85000 }
+  { id: "csv1", name: "Import 1", contacts: 50000 },
+  { id: "csv2", name: "Import 2", contacts: 75000 },
+  { id: "csv3", name: "Import 3", contacts: 100000 },
+  { id: "csv4", name: "Import 4", contacts: 85000 }
 ];
 
 const formatNumber = (num: number): string => {
