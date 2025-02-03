@@ -192,7 +192,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
       </div>
       
       <div className="space-y-3">
-        <Textarea
+        <textarea
           value={data.content}
           onChange={(e) => {
             if (e.target.value.length <= MAX_CHARS) {
@@ -200,7 +200,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
             }
           }}
           placeholder="Type your message here..."
-          className="min-h-[120px] resize-y w-full p-3 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 mb-1 text-base leading-relaxed"
+          className="min-h-[120px] resize-y w-full p-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 mb-1 text-base leading-relaxed bg-white"
           style={{ 
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             caretColor: '#2563eb'
