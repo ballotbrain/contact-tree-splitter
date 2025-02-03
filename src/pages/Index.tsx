@@ -198,22 +198,22 @@ const Index = () => {
               contacts: totalContacts,
               onSegment: () => {
                 const dialog = document.createElement('dialog');
-                dialog.className = 'fixed inset-0 z-50 bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto mt-20';
+                dialog.className = 'fixed inset-0 z-50 bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto mt-20';
                 dialog.innerHTML = `
                   <div class="w-full">
-                    <h2 class="text-xl font-semibold mb-4">Select Demographic Tag</h2>
-                    <div class="space-y-2">
+                    <h2 class="text-xl font-semibold mb-6">Select Demographic Tag</h2>
+                    <div class="space-y-3">
                       ${DEMOGRAPHIC_TAGS.map(tag => `
                         <button 
-                          class="w-full flex items-center justify-between p-3 text-left rounded hover:bg-gray-50 border border-gray-200 transition-colors"
+                          class="w-full flex items-center justify-between p-4 text-left rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
                           onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
                         >
                           <div class="flex items-center gap-3">
-                            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                               <line x1="7" y1="7" x2="7.01" y2="7"/>
                             </svg>
-                            <span class="font-medium">${tag.name}</span>
+                            <span class="font-medium text-gray-900">${tag.name}</span>
                           </div>
                           <span class="text-sm text-gray-500">
                             ${Number(tag.segmentSize).toLocaleString()} contacts
@@ -225,7 +225,7 @@ const Index = () => {
                 `;
                 
                 const backdrop = document.createElement('div');
-                backdrop.className = 'fixed inset-0 bg-black bg-opacity-50';
+                backdrop.className = 'fixed inset-0 bg-black bg-opacity-50 transition-opacity';
                 backdrop.onclick = () => {
                   dialog.close();
                   dialog.remove();
