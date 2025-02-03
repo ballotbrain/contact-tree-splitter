@@ -131,25 +131,47 @@ const Index = () => {
     const messageNodes = nodes.filter(node => node.type === 'message');
     let totalCost = 0;
     let smsCount = 0;
-    let mmsCount = 0;
+    let mmsImageCount = 0;
+    let mmsVideoCount = 0;
 
     messageNodes.forEach(node => {
-      const hasMedia = node.data.content?.includes('[Media]') || false;
-      if (hasMedia) {
-        mmsCount++;
-        totalCost += 0.06;
+      // Get the parent audience node to get the number of contacts
+      const parentEdge = edges.find(edge => edge.target === node.id);
+      if (!parentEdge) return;
+
+      const parentNode = nodes.find(n => n.id === parentEdge.source);
+      if (!parentNode || !parentNode.data) return;
+
+      const contacts = parentNode.data.contacts || 0;
+
+      const content = node.data?.content as string || '';
+      const hasVideo = content.includes('[Video]');
+      const hasImage = content.includes('[Media]') && !hasVideo;
+
+      if (hasVideo) {
+        mmsVideoCount++;
+        totalCost += contacts * 0.065; // $0.065 per video MMS
+      } else if (hasImage) {
+        mmsImageCount++;
+        totalCost += contacts * 0.06; // $0.06 per image MMS
       } else {
         smsCount++;
-        totalCost += 0.03;
+        totalCost += contacts * 0.03; // $0.03 per SMS
       }
     });
 
     return {
       total: totalCost.toFixed(2),
       smsCount,
-      mmsCount
+      mmsImageCount,
+      mmsVideoCount,
+      breakdown: {
+        sms: (smsCount > 0 ? `SMS (${smsCount}): $${(smsCount * 0.03).toFixed(2)}` : null),
+        mmsImage: (mmsImageCount > 0 ? `Image MMS (${mmsImageCount}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
+        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${mmsVideoCount}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
+      }
     };
-  }, [nodes]);
+  }, [nodes, edges]);
 
   const costs = calculateTotalCost();
 
@@ -380,17 +402,14 @@ const Index = () => {
                 </Tooltip>
               </div>
             )}
-            {(costs.smsCount > 0 || costs.mmsCount > 0) && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Estimated Costs</h3>
-                <div className="space-y-1 text-sm text-gray-600">
-                  {costs.smsCount > 0 && (
-                    <p>SMS Messages: {costs.smsCount} × $0.03 = ${(costs.smsCount * 0.03).toFixed(2)}</p>
-                  )}
-                  {costs.mmsCount > 0 && (
-                    <p>MMS Messages: {costs.mmsCount} × $0.06 = ${(costs.mmsCount * 0.06).toFixed(2)}</p>
-                  )}
-                  <p className="text-gray-900 font-medium pt-1 border-t border-gray-200">
+            {(costs.smsCount > 0 || costs.mmsImageCount > 0 || costs.mmsVideoCount > 0) && (
+              <div className="mt-4 p-3 bg-neutral-50 rounded-md border border-neutral-200">
+                <h3 className="text-sm font-medium text-neutral-900 mb-2">Estimated Costs</h3>
+                <div className="space-y-1 text-sm text-neutral-600">
+                  {costs.breakdown.sms && <p>{costs.breakdown.sms}</p>}
+                  {costs.breakdown.mmsImage && <p>{costs.breakdown.mmsImage}</p>}
+                  {costs.breakdown.mmsVideo && <p>{costs.breakdown.mmsVideo}</p>}
+                  <p className="text-neutral-900 font-medium pt-1 border-t border-neutral-200">
                     Total: ${costs.total}
                   </p>
                 </div>
