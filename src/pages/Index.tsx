@@ -198,21 +198,41 @@ const Index = () => {
               contacts: totalContacts,
               onSegment: () => {
                 const dialog = document.createElement('dialog');
+                dialog.className = 'fixed inset-0 z-50 bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto mt-20';
                 dialog.innerHTML = `
-                  <div class="p-4">
-                    <h2 class="text-lg font-bold mb-4">Select Demographic Tag</h2>
+                  <div class="w-full">
+                    <h2 class="text-xl font-semibold mb-4">Select Demographic Tag</h2>
                     <div class="space-y-2">
                       ${DEMOGRAPHIC_TAGS.map(tag => `
                         <button 
-                          class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
+                          class="w-full flex items-center justify-between p-3 text-left rounded hover:bg-gray-50 border border-gray-200 transition-colors"
                           onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
                         >
-                          ${tag.name} (${Number(tag.segmentSize).toLocaleString()} contacts)
+                          <div class="flex items-center gap-3">
+                            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                              <line x1="7" y1="7" x2="7.01" y2="7"/>
+                            </svg>
+                            <span class="font-medium">${tag.name}</span>
+                          </div>
+                          <span class="text-sm text-gray-500">
+                            ${Number(tag.segmentSize).toLocaleString()} contacts
+                          </span>
                         </button>
                       `).join('')}
                     </div>
                   </div>
                 `;
+                
+                const backdrop = document.createElement('div');
+                backdrop.className = 'fixed inset-0 bg-black bg-opacity-50';
+                backdrop.onclick = () => {
+                  dialog.close();
+                  dialog.remove();
+                  backdrop.remove();
+                };
+                
+                document.body.appendChild(backdrop);
                 document.body.appendChild(dialog);
                 dialog.showModal();
 
@@ -220,6 +240,7 @@ const Index = () => {
                   handleTagSelect(nodeId, tagId, segmentSize, audienceName);
                   dialog.close();
                   dialog.remove();
+                  backdrop.remove();
                 };
               },
               onMessageCreate: () => createMessageNode(nodeId),
@@ -231,7 +252,7 @@ const Index = () => {
         return node;
       })
     );
-  }, [setNodes, createMessageNode, createPollNode]);
+  }, [setNodes, createMessageNode, createPollNode, handleTagSelect]);
 
   const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
