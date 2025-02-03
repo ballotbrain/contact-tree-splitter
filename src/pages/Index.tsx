@@ -159,6 +159,62 @@ const Index = () => {
     }]);
   }, [nodes, setNodes, setEdges, deleteNode]);
 
+  const createPollNode = useCallback((sourceId: string) => {
+    const sourceNode = nodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+
+    const existingPollNodes = nodes.filter(n => n.type === 'poll');
+    const questionNumber = existingPollNodes.length + 1;
+
+    const newPosition = {
+      x: sourceNode.position.x,
+      y: sourceNode.position.y + 250
+    };
+
+    const newNode: CustomNode = {
+      id: `poll-${Date.now()}`,
+      type: 'poll',
+      position: newPosition,
+      data: {
+        question: '',
+        options: [],
+        questionNumber,
+        onQuestionChange: (question: string) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, question } }
+                : node
+            )
+          );
+        },
+        onOptionsChange: (options: any[]) => {
+          setNodes(nds => 
+            nds.map(node => 
+              node.id === `poll-${Date.now()}`
+                ? { ...node, data: { ...node.data, options } }
+                : node
+            )
+          );
+        },
+        onDelete: () => deleteNode(`poll-${Date.now()}`),
+        areaCode: selectedAreaCode,
+        onAreaCodeChange: setSelectedAreaCode,
+        onAddNextQuestion: () => {
+          createPollNode(`poll-${Date.now()}`);
+        },
+      },
+    };
+
+    setNodes(nds => [...nds, newNode]);
+    setEdges(eds => [...eds, { 
+      id: `e-${sourceId}-${newNode.id}`,
+      source: sourceId,
+      target: newNode.id,
+      type: 'smoothstep',
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
+
   const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
     if (!parentNode) return;
@@ -246,63 +302,6 @@ const Index = () => {
     );
   }, [setNodes, handleTagSelect, createMessageNode, createPollNode, deleteNode]);
 
-  const createPollNode = useCallback((sourceId: string) => {
-    const sourceNode = nodes.find(n => n.id === sourceId);
-    if (!sourceNode) return;
-
-    const existingPollNodes = nodes.filter(n => n.type === 'poll');
-    const questionNumber = existingPollNodes.length + 1;
-
-    const newPosition = {
-      x: sourceNode.position.x,
-      y: sourceNode.position.y + 250 // Add some vertical spacing
-    };
-
-    const newNode: CustomNode = {
-      id: `poll-${Date.now()}`,
-      type: 'poll',
-      position: newPosition,
-      data: {
-        question: '',
-        options: [],
-        questionNumber,
-        onQuestionChange: (question: string) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `poll-${Date.now()}`
-                ? { ...node, data: { ...node.data, question } }
-                : node
-            )
-          );
-        },
-        onOptionsChange: (options: any[]) => {
-          setNodes(nds => 
-            nds.map(node => 
-              node.id === `poll-${Date.now()}`
-                ? { ...node, data: { ...node.data, options } }
-                : node
-            )
-          );
-        },
-        onDelete: () => deleteNode(`poll-${Date.now()}`),
-        areaCode: selectedAreaCode,
-        onAreaCodeChange: setSelectedAreaCode,
-        onAddNextQuestion: () => {
-          // This will create the next poll question in the chain
-          createPollNode(`poll-${Date.now()}`);
-        },
-      },
-    };
-
-    setNodes(nds => [...nds, newNode]);
-    setEdges(eds => [...eds, { 
-      id: `e-${sourceId}-${newNode.id}`,
-      source: sourceId,
-      target: newNode.id,
-      type: 'smoothstep',
-    }]);
-  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
-
   const calculateTotalCost = useCallback(() => {
     const messageNodes = nodes.filter(node => node.type === 'message');
     let totalCost = 0;
@@ -320,7 +319,6 @@ const Index = () => {
       const contacts = Number(parentNode.data.contacts) || 0;
       const content = (node.data?.content as string) || '';
       
-      // Check for media tags in the content
       const hasVideo = content.includes('[Video]');
       const hasImage = content.includes('[Media]') && !hasVideo;
 
