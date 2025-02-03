@@ -180,6 +180,17 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <div className="relative py-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-neutral-200" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-white px-2 text-sm text-neutral-500">
+              or
+            </span>
+          </div>
+        </div>
+
         <Button 
           variant="outline" 
           size="sm" 

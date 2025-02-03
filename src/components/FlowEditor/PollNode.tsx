@@ -78,7 +78,7 @@ const PollNode = ({ data }: PollNodeProps) => {
 
   return (
     <div className="flex gap-8">
-      <div className="bg-white rounded-lg shadow-md p-4 min-w-[400px] border border-gray-200">
+      <div className="bg-neutral-50 rounded-lg shadow-md p-4 min-w-[400px] border border-neutral-200">
         <PollHeader
           questionNumber={data.questionNumber || 1}
           areaCode={data.areaCode}
