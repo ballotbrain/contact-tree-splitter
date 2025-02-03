@@ -160,15 +160,17 @@ const Index = () => {
       }
     });
 
+    const formatNumber = (num: number) => num.toLocaleString();
+
     return {
       total: totalCost.toFixed(2),
-      smsCount,
-      mmsImageCount,
-      mmsVideoCount,
+      smsCount: formatNumber(smsCount),
+      mmsImageCount: formatNumber(mmsImageCount),
+      mmsVideoCount: formatNumber(mmsVideoCount),
       breakdown: {
-        sms: (smsCount > 0 ? `SMS (${smsCount}): $${(smsCount * 0.03).toFixed(2)}` : null),
-        mmsImage: (mmsImageCount > 0 ? `Image MMS (${mmsImageCount}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
-        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${mmsVideoCount}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
+        sms: (smsCount > 0 ? `SMS (${formatNumber(smsCount)}): $${(smsCount * 0.03).toFixed(2)}` : null),
+        mmsImage: (mmsImageCount > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
+        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
       }
     };
   }, [nodes, edges]);

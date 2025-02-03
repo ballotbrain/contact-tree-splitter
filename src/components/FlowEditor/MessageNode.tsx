@@ -264,13 +264,13 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               key={index}
               onClick={() => handleMediaSelect(media)}
               className={`relative cursor-pointer group ${
-                selectedMedia === media.url ? 'ring-2 ring-blue-500' : ''
+                selectedMedia === media.url ? 'ring-2 ring-black' : ''
               }`}
             >
               <img
                 src={media.thumbnail}
                 alt={`Media ${index + 1}`}
-                className="w-full h-20 object-cover rounded-md border border-gray-200 transition-all duration-200 group-hover:border-blue-500"
+                className="w-full h-20 object-cover rounded-md border border-gray-200 transition-all duration-200 group-hover:border-black"
               />
               {media.type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
