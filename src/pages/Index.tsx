@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { CustomNode, CustomEdge } from "@/types/flow";
+import { CustomNode, CustomEdge, AudienceNodeData } from "@/types/flow";
 import {
   Tooltip,
   TooltipContent,
@@ -92,92 +92,6 @@ const Index = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
 
-  const resetFlow = useCallback(() => {
-    setNodes(initialNodes);
-    setEdges([]);
-    setHasSelectedAudience(false);
-  }, [setNodes, setEdges]);
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
-
-  const getChildNodes = useCallback((nodeId: string): string[] => {
-    const childEdges = edges.filter(edge => edge.source === nodeId);
-    const childIds = childEdges.map(edge => edge.target);
-    const descendantIds: string[] = [];
-    
-    childIds.forEach(childId => {
-      descendantIds.push(childId);
-      descendantIds.push(...getChildNodes(childId));
-    });
-    
-    return descendantIds;
-  }, [edges]);
-
-  const deleteNode = useCallback((nodeId: string) => {
-    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
-    
-    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
-    setEdges(eds => eds.filter(edge => 
-      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
-    ));
-  }, [getChildNodes, setNodes, setEdges]);
-
-  const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
-    setNodes(nds =>
-      nds.map(node => {
-        if (node.id === nodeId) {
-          const totalContacts = AVAILABLE_AUDIENCES
-            .filter(audience => audienceIds.includes(audience.id))
-            .reduce((sum, audience) => sum + Number(audience.contacts), 0);
-          
-          setHasSelectedAudience(audienceIds.length > 0);
-          
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              selectedAudiences: audienceIds,
-              contacts: totalContacts,
-              onSegment: () => {
-                const dialog = document.createElement('dialog');
-                dialog.innerHTML = `
-                  <div class="p-4">
-                    <h2 class="text-lg font-bold mb-4">Select Demographic Tag</h2>
-                    <div class="space-y-2">
-                      ${DEMOGRAPHIC_TAGS.map(tag => `
-                        <button 
-                          class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
-                          onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
-                        >
-                          ${tag.name} (${Number(tag.segmentSize).toLocaleString()} contacts)
-                        </button>
-                      `).join('')}
-                    </div>
-                  </div>
-                `;
-                document.body.appendChild(dialog);
-                dialog.showModal();
-
-                window.handleTagSelect = (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
-                  handleTagSelect(nodeId, tagId, segmentSize, audienceName);
-                  dialog.close();
-                  dialog.remove();
-                };
-              },
-              onMessageCreate: () => createMessageNode(nodeId),
-              onPollCreate: () => createPollNode(nodeId),
-              onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, [setNodes, createMessageNode, createPollNode, deleteNode]);
-
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
     if (!sourceNode) return;
@@ -210,7 +124,7 @@ const Index = () => {
       source: sourceId,
       target: newNode.id,
     }]);
-  }, [nodes, setNodes, setEdges, deleteNode]);
+  }, [nodes, setNodes, setEdges]);
 
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -264,7 +178,60 @@ const Index = () => {
       target: newNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
+  }, [nodes, setNodes, setEdges, selectedAreaCode]);
+
+  const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
+    setNodes(nds =>
+      nds.map(node => {
+        if (node.id === nodeId) {
+          const totalContacts = AVAILABLE_AUDIENCES
+            .filter(audience => audienceIds.includes(audience.id))
+            .reduce((sum, audience) => sum + Number(audience.contacts), 0);
+          
+          setHasSelectedAudience(audienceIds.length > 0);
+          
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              selectedAudiences: audienceIds,
+              contacts: totalContacts,
+              onSegment: () => {
+                const dialog = document.createElement('dialog');
+                dialog.innerHTML = `
+                  <div class="p-4">
+                    <h2 class="text-lg font-bold mb-4">Select Demographic Tag</h2>
+                    <div class="space-y-2">
+                      ${DEMOGRAPHIC_TAGS.map(tag => `
+                        <button 
+                          class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
+                          onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
+                        >
+                          ${tag.name} (${Number(tag.segmentSize).toLocaleString()} contacts)
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+                document.body.appendChild(dialog);
+                dialog.showModal();
+
+                window.handleTagSelect = (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
+                  handleTagSelect(nodeId, tagId, segmentSize, audienceName);
+                  dialog.close();
+                  dialog.remove();
+                };
+              },
+              onMessageCreate: () => createMessageNode(nodeId),
+              onPollCreate: () => createPollNode(nodeId),
+              onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [setNodes, createMessageNode, createPollNode]);
 
   const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
@@ -281,7 +248,7 @@ const Index = () => {
         label: `${audienceName} - ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
         contacts: segmentSize,
         parentAudience: audienceName,
-        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name,
+        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name || '',
         selectedAudiences: parentNode.data.selectedAudiences,
         selectedTags: [],
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
@@ -289,7 +256,7 @@ const Index = () => {
         onSegment: () => {},
         onDelete: () => deleteNode(`segment-${Date.now()}`),
         onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
-      },
+      } as AudienceNodeData,
     };
 
     setNodes(nds => [...nds, segmentNode]);
@@ -299,7 +266,40 @@ const Index = () => {
       target: segmentNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, deleteNode, handleAudienceChange]);
+  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, handleAudienceChange]);
+
+  const resetFlow = useCallback(() => {
+    setNodes(initialNodes);
+    setEdges([]);
+    setHasSelectedAudience(false);
+  }, [setNodes, setEdges]);
+
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  const getChildNodes = useCallback((nodeId: string): string[] => {
+    const childEdges = edges.filter(edge => edge.source === nodeId);
+    const childIds = childEdges.map(edge => edge.target);
+    const descendantIds: string[] = [];
+    
+    childIds.forEach(childId => {
+      descendantIds.push(childId);
+      descendantIds.push(...getChildNodes(childId));
+    });
+    
+    return descendantIds;
+  }, [edges]);
+
+  const deleteNode = useCallback((nodeId: string) => {
+    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
+    
+    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
+    setEdges(eds => eds.filter(edge => 
+      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
+    ));
+  }, [getChildNodes, setNodes, setEdges]);
 
   const calculateTotalCost = useCallback(() => {
     const messageNodes = nodes.filter(node => node.type === 'message');
