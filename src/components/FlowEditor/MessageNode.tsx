@@ -11,7 +11,8 @@ import {
   Calendar,
   Clock,
   Zap,
-  Phone
+  Phone,
+  Trash
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { 
@@ -202,7 +203,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               onClick={data.onDelete}
               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -355,7 +356,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
                   data.onKeywordTriggersChange?.(newTriggers);
                 }}
               >
-                <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700 hover:bg-red-50" />
+                <Trash className="h-4 w-4 text-red-600 hover:text-red-700 hover:bg-red-50" />
               </Button>
             </div>
           ))}
