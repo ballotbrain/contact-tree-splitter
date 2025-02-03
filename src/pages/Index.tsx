@@ -135,7 +135,6 @@ const Index = () => {
     let mmsVideoCount = 0;
 
     messageNodes.forEach(node => {
-      // Get the parent audience node to get the number of contacts
       const parentEdge = edges.find(edge => edge.target === node.id);
       if (!parentEdge) return;
 
@@ -143,19 +142,20 @@ const Index = () => {
       if (!parentNode || !parentNode.data) return;
 
       const contacts = Number(parentNode.data.contacts) || 0;
-
       const content = (node.data?.content as string) || '';
+      
+      // Check for media tags in the content
       const hasVideo = content.includes('[Video]');
       const hasImage = content.includes('[Media]') && !hasVideo;
 
       if (hasVideo) {
-        mmsVideoCount++;
+        mmsVideoCount += contacts;
         totalCost += contacts * 0.065; // $0.065 per video MMS
       } else if (hasImage) {
-        mmsImageCount++;
+        mmsImageCount += contacts;
         totalCost += contacts * 0.06; // $0.06 per image MMS
       } else {
-        smsCount++;
+        smsCount += contacts;
         totalCost += contacts * 0.03; // $0.03 per SMS
       }
     });
