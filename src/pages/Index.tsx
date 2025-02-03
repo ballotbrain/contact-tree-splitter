@@ -78,6 +78,7 @@ const initialNodes: CustomNode[] = [
       selectedAudiences: [],
       onMessageCreate: () => {},
       onPollCreate: () => {},
+      onSegment: () => {},
     },
   },
 ];
@@ -117,65 +118,6 @@ const Index = () => {
       !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
     ));
   }, [getChildNodes, setNodes, setEdges]);
-
-  const resetFlow = useCallback(() => {
-    setNodes(initialNodes);
-    setEdges([]);
-    toast({
-      title: "Flow Reset",
-      description: "The flow has been reset to its initial state",
-    });
-  }, [setNodes, setEdges, toast]);
-
-  const calculateTotalCost = useCallback(() => {
-    const messageNodes = nodes.filter(node => node.type === 'message');
-    let totalCost = 0;
-    let smsCount = 0;
-    let mmsImageCount = 0;
-    let mmsVideoCount = 0;
-
-    messageNodes.forEach(node => {
-      const parentEdge = edges.find(edge => edge.target === node.id);
-      if (!parentEdge) return;
-
-      const parentNode = nodes.find(n => n.id === parentEdge.source);
-      if (!parentNode || !parentNode.data) return;
-
-      const contacts = Number(parentNode.data.contacts) || 0;
-      const content = (node.data?.content as string) || '';
-      
-      // Check for media tags in the content
-      const hasVideo = content.includes('[Video]');
-      const hasImage = content.includes('[Media]') && !hasVideo;
-
-      if (hasVideo) {
-        mmsVideoCount += contacts;
-        totalCost += contacts * 0.065; // $0.065 per video MMS
-      } else if (hasImage) {
-        mmsImageCount += contacts;
-        totalCost += contacts * 0.06; // $0.06 per image MMS
-      } else {
-        smsCount += contacts;
-        totalCost += contacts * 0.03; // $0.03 per SMS
-      }
-    });
-
-    const formatNumber = (num: number) => num.toLocaleString();
-
-    return {
-      total: totalCost.toFixed(2),
-      smsCount: formatNumber(smsCount),
-      mmsImageCount: formatNumber(mmsImageCount),
-      mmsVideoCount: formatNumber(mmsVideoCount),
-      breakdown: {
-        sms: (smsCount > 0 ? `SMS (${formatNumber(smsCount)}): $${(smsCount * 0.03).toFixed(2)}` : null),
-        mmsImage: (mmsImageCount > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
-        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
-      }
-    };
-  }, [nodes, edges]);
-
-  const costs = calculateTotalCost();
 
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -231,6 +173,7 @@ const Index = () => {
         segmentCriteria: tagName,
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
+        onSegment: () => {},
       },
     };
 
@@ -259,13 +202,42 @@ const Index = () => {
               ...node.data,
               selectedAudiences: audienceIds,
               contacts: totalContacts,
+              onSegment: () => {
+                const dialog = document.createElement('dialog');
+                dialog.innerHTML = `
+                  <div class="p-4">
+                    <h2 class="text-lg font-bold mb-4">Select Demographic Tag</h2>
+                    <div class="space-y-2">
+                      ${DEMOGRAPHIC_TAGS.map(tag => `
+                        <button 
+                          class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
+                          onclick="handleTagSelect('${nodeId}', '${tag.id}', ${tag.segmentSize}, '${node.data.label}')"
+                        >
+                          ${tag.name} (${tag.segmentSize.toLocaleString()} contacts)
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+                document.body.appendChild(dialog);
+                dialog.showModal();
+
+                // Add the global handler for tag selection
+                window.handleTagSelect = (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
+                  handleTagSelect(nodeId, tagId, segmentSize, audienceName);
+                  dialog.close();
+                  dialog.remove();
+                };
+              },
+              onMessageCreate: () => createMessageNode(nodeId),
+              onPollCreate: () => createPollNode(nodeId),
             },
           };
         }
         return node;
       })
     );
-  }, [setNodes]);
+  }, [setNodes, handleTagSelect, createMessageNode]);
 
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -323,6 +295,56 @@ const Index = () => {
       type: 'smoothstep',
     }]);
   }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
+
+  const calculateTotalCost = useCallback(() => {
+    const messageNodes = nodes.filter(node => node.type === 'message');
+    let totalCost = 0;
+    let smsCount = 0;
+    let mmsImageCount = 0;
+    let mmsVideoCount = 0;
+
+    messageNodes.forEach(node => {
+      const parentEdge = edges.find(edge => edge.target === node.id);
+      if (!parentEdge) return;
+
+      const parentNode = nodes.find(n => n.id === parentEdge.source);
+      if (!parentNode || !parentNode.data) return;
+
+      const contacts = Number(parentNode.data.contacts) || 0;
+      const content = (node.data?.content as string) || '';
+      
+      // Check for media tags in the content
+      const hasVideo = content.includes('[Video]');
+      const hasImage = content.includes('[Media]') && !hasVideo;
+
+      if (hasVideo) {
+        mmsVideoCount += contacts;
+        totalCost += contacts * 0.065; // $0.065 per video MMS
+      } else if (hasImage) {
+        mmsImageCount += contacts;
+        totalCost += contacts * 0.06; // $0.06 per image MMS
+      } else {
+        smsCount += contacts;
+        totalCost += contacts * 0.03; // $0.03 per SMS
+      }
+    });
+
+    const formatNumber = (num: number) => num.toLocaleString();
+
+    return {
+      total: totalCost.toFixed(2),
+      smsCount: formatNumber(smsCount),
+      mmsImageCount: formatNumber(mmsImageCount),
+      mmsVideoCount: formatNumber(mmsVideoCount),
+      breakdown: {
+        sms: (smsCount > 0 ? `SMS (${formatNumber(smsCount)}): $${(smsCount * 0.03).toFixed(2)}` : null),
+        mmsImage: (mmsImageCount > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
+        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
+      }
+    };
+  }, [nodes, edges]);
+
+  const costs = calculateTotalCost();
 
   const nodesWithHandlers = nodes.map((node) => {
     if (node.type === "audience") {
