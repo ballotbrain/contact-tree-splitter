@@ -233,6 +233,7 @@ const Index = () => {
         contacts: segmentSize,
         parentAudience: audienceName,
         segmentCriteria: tagName,
+        selectedAudiences: parentNode.data.selectedAudiences, // Copy parent's selected audiences
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
         onSegment: () => {},
