@@ -125,7 +125,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   return (
-    <div className="bg-[#f5f5f5] rounded-lg shadow-md p-4 min-w-[300px] border border-gray-200">
+    <div className="bg-[#f5f5f5] rounded-lg shadow-md p-4 min-w-[400px] max-w-[600px] border border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-gray-600" />
@@ -200,7 +200,11 @@ const MessageNode = ({ data }: MessageNodeProps) => {
             }
           }}
           placeholder="Type your message here..."
-          className="min-h-[100px] mb-1"
+          className="min-h-[120px] resize-y w-full p-3 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 mb-1 text-base leading-relaxed"
+          style={{ 
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            caretColor: '#2563eb'
+          }}
         />
         
         <div className="flex items-center justify-between text-sm text-gray-500">
