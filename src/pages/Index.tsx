@@ -137,7 +137,7 @@ const Index = () => {
         onSegment: () => {},
         onDelete: () => deleteNode(`segment-${Date.now()}`),
         onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
-      },
+      } as AudienceNodeData,
     };
 
     setNodes(nds => [...nds, segmentNode]);
@@ -351,13 +351,13 @@ const Index = () => {
 
       if (hasVideo) {
         mmsVideoCount += contacts;
-        totalCost += contacts * 0.065; // $0.065 per video MMS
+        totalCost += contacts * 0.065;
       } else if (hasImage) {
         mmsImageCount += contacts;
-        totalCost += contacts * 0.06; // $0.06 per image MMS
+        totalCost += contacts * 0.06;
       } else {
         smsCount += contacts;
-        totalCost += contacts * 0.03; // $0.03 per SMS
+        totalCost += contacts * 0.03;
       }
     });
 
@@ -369,9 +369,9 @@ const Index = () => {
       mmsImageCount: formatNumber(mmsImageCount),
       mmsVideoCount: formatNumber(mmsVideoCount),
       breakdown: {
-        sms: (smsCount > 0 ? `SMS (${formatNumber(smsCount)}): $${(smsCount * 0.03).toFixed(2)}` : null),
-        mmsImage: (mmsImageCount > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(mmsImageCount * 0.06).toFixed(2)}` : null),
-        mmsVideo: (mmsVideoCount > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(mmsVideoCount * 0.065).toFixed(2)}` : null)
+        sms: (Number(smsCount) > 0 ? `SMS (${formatNumber(smsCount)}): $${(Number(smsCount) * 0.03).toFixed(2)}` : null),
+        mmsImage: (Number(mmsImageCount) > 0 ? `Image MMS (${formatNumber(mmsImageCount)}): $${(Number(mmsImageCount) * 0.06).toFixed(2)}` : null),
+        mmsVideo: (Number(mmsVideoCount) > 0 ? `Video MMS (${formatNumber(mmsVideoCount)}): $${(Number(mmsVideoCount) * 0.065).toFixed(2)}` : null)
       }
     };
   }, [nodes, edges]);
@@ -539,7 +539,6 @@ const Index = () => {
   );
 };
 
-// Add TypeScript declaration for the global handleTagSelect function
 declare global {
   interface Window {
     handleTagSelect: (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => void;
