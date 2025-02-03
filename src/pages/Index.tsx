@@ -1,10 +1,10 @@
 import { useState } from "react";
-import ReactFlow, { Background, Controls } from "@xyflow/react";
+import { ReactFlow, Background, Controls } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { MessageNode } from "@/components/FlowEditor/MessageNode";
-import { PollNode } from "@/components/FlowEditor/PollNode";
-import { AudienceNode } from "@/components/FlowEditor/AudienceNode";
-import { SequenceNode } from "@/components/FlowEditor/SequenceNode";
+import MessageNode from "@/components/FlowEditor/MessageNode";
+import PollNode from "@/components/FlowEditor/PollNode";
+import AudienceNode from "@/components/FlowEditor/AudienceNode";
+import SequenceNode from "@/components/FlowEditor/SequenceNode";
 
 const nodeTypes = {
   messageNode: MessageNode,
