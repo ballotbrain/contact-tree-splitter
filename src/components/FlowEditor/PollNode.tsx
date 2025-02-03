@@ -4,12 +4,19 @@ import { PollOption } from "@/types/flow";
 import { PollHeader } from "./Poll/PollHeader";
 import { PollQuestion } from "./Poll/PollQuestion";
 import { PollAnswers } from "./Poll/PollAnswers";
-import { DEFAULT_OPTIONS, addNewOption, deleteOption, updateOption, toggleOptionLeadsTo } from "./Poll/PollOptionManager";
-import { ListOrdered } from "lucide-react";
+import { ListOrdered, Phone, Clock, Calendar, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { DEFAULT_OPTIONS, addNewOption, deleteOption, updateOption, toggleOptionLeadsTo } from "./Poll/PollOptionManager";
 
 interface PollNodeProps {
   data: {
@@ -79,6 +86,12 @@ const PollNode = ({ data }: PollNodeProps) => {
     if (updatedOptions) {
       data.onOptionsChange(updatedOptions);
     }
+  };
+
+  const handleEmojiSelect = (emoji: any) => {
+    const newQuestion = data.question + emoji.native;
+    data.onQuestionChange(newQuestion);
+    setShowEmojiPicker(false);
   };
 
   return (
@@ -164,6 +177,7 @@ const PollNode = ({ data }: PollNodeProps) => {
           onQuestionChange={data.onQuestionChange}
           showEmojiPicker={showEmojiPicker}
           setShowEmojiPicker={setShowEmojiPicker}
+          onEmojiSelect={handleEmojiSelect}
           handleMediaUpload={() => {}}
           maxChars={MAX_CHARS}
           questionNumber={data.questionNumber}
