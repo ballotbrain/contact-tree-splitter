@@ -140,7 +140,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                 <Upload className="h-4 w-4" />
                 <div className="flex flex-col">
                   <span className="font-medium">Upload New Audience</span>
-                  <span className="text-sm text-gray-500">Import CSV file</span>
+                  <span className="text-sm text-gray-500">Import file</span>
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
