@@ -1,3 +1,37 @@
-I apologize, but I don't see the original content of `src/pages/Index.tsx` in the conversation, so I cannot reconstruct the full file by replacing the placeholders. The AI's response only showed fragments of changes they wanted to make, but without the original file content, I cannot provide the complete code.
+import { useState } from "react";
+import ReactFlow, { Background, Controls } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { MessageNode } from "@/components/FlowEditor/MessageNode";
+import { PollNode } from "@/components/FlowEditor/PollNode";
+import { AudienceNode } from "@/components/FlowEditor/AudienceNode";
+import { SequenceNode } from "@/components/FlowEditor/SequenceNode";
 
-To help you properly, could you please share the current content of `src/pages/Index.tsx`? Once you do, I can help you integrate the changes while preserving all the necessary existing code.
+const nodeTypes = {
+  messageNode: MessageNode,
+  pollNode: PollNode,
+  audienceNode: AudienceNode,
+  sequenceNode: SequenceNode,
+};
+
+const Index = () => {
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={setNodes}
+        onEdgesChange={setEdges}
+        nodeTypes={nodeTypes}
+        fitView
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </div>
+  );
+};
+
+export default Index;
