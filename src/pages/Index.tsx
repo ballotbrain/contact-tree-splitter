@@ -180,6 +180,7 @@ const Index = () => {
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
         onSegment: () => {},
+        onDelete: () => deleteNode(`segment-${Date.now()}`),
       },
     };
 
@@ -190,7 +191,7 @@ const Index = () => {
       target: segmentNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges]);
+  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, deleteNode]);
 
   const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
     setNodes(nds =>
@@ -219,7 +220,7 @@ const Index = () => {
                           class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
                           onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${tag.segmentSize}, '${node.data.label}')"
                         >
-                          ${tag.name} (${tag.segmentSize.toLocaleString()} contacts)
+                          ${tag.name} (${Number(tag.segmentSize).toLocaleString()} contacts)
                         </button>
                       `).join('')}
                     </div>
@@ -228,7 +229,6 @@ const Index = () => {
                 document.body.appendChild(dialog);
                 dialog.showModal();
 
-                // Add the global handler for tag selection
                 window.handleTagSelect = (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
                   handleTagSelect(nodeId, tagId, segmentSize, audienceName);
                   dialog.close();
@@ -237,13 +237,14 @@ const Index = () => {
               },
               onMessageCreate: () => createMessageNode(nodeId),
               onPollCreate: () => createPollNode(nodeId),
+              onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
             },
           };
         }
         return node;
       })
     );
-  }, [setNodes, handleTagSelect, createMessageNode]);
+  }, [setNodes, handleTagSelect, createMessageNode, createPollNode, deleteNode]);
 
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -364,6 +365,7 @@ const Index = () => {
           onPollCreate: () => createPollNode(node.id),
           onAudienceChange: (audienceIds: string[]) => handleAudienceChange(node.id, audienceIds),
           onDelete: node.id !== "1" ? () => deleteNode(node.id) : undefined,
+          onSegment: node.data.onSegment,
         },
       };
     }
