@@ -127,6 +127,32 @@ const Index = () => {
     });
   }, [setNodes, setEdges, toast]);
 
+  const calculateTotalCost = useCallback(() => {
+    const messageNodes = nodes.filter(node => node.type === 'message');
+    let totalCost = 0;
+    let smsCount = 0;
+    let mmsCount = 0;
+
+    messageNodes.forEach(node => {
+      const hasMedia = node.data.content?.includes('[Media]') || false;
+      if (hasMedia) {
+        mmsCount++;
+        totalCost += 0.06;
+      } else {
+        smsCount++;
+        totalCost += 0.03;
+      }
+    });
+
+    return {
+      total: totalCost.toFixed(2),
+      smsCount,
+      mmsCount
+    };
+  }, [nodes]);
+
+  const costs = calculateTotalCost();
+
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
     if (!sourceNode) return;
@@ -324,35 +350,53 @@ const Index = () => {
           <p className="text-sm text-gray-600">
             Auto-saved at {format(new Date(), "p 'on' PP")}
           </p>
-          <div className="mt-3 flex items-center text-sm text-gray-900">
-            <ChevronRight className="h-4 w-4 animate-bounce" />
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <span className="cursor-help">Start by selecting your audience</span>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[200px] bg-[#222222] text-white border-gray-700">
-                <p>Click the dropdown in the audience node to choose your target audience</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          {hasSelectedAudience && (
-            <div className="mt-2 flex items-center text-sm text-gray-900">
-              <ChevronRight className="h-4 w-4 animate-bounce" />
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center text-sm text-gray-900">
+              <ChevronRight className="h-4 w-4" />
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <span className="cursor-help">Choose your next action</span>
+                  <span className="cursor-help">Start by selecting your audience</span>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
-                  <p>You can now:</p>
-                  <ul className="list-disc ml-4 mt-1">
-                    <li>Segment your audience by demographics</li>
-                    <li>Create a message to send</li>
-                    <li>Create a poll to gather feedback</li>
-                  </ul>
+                <TooltipContent className="max-w-[200px] bg-[#222222] text-white border-gray-700">
+                  <p>Click the dropdown in the audience node to choose your target audience</p>
                 </TooltipContent>
               </Tooltip>
             </div>
-          )}
+            {hasSelectedAudience && (
+              <div className="flex items-center text-sm text-gray-900">
+                <ChevronRight className="h-4 w-4" />
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">Choose your next action</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[250px] bg-[#222222] text-white border-gray-700">
+                    <p>You can now:</p>
+                    <ul className="list-disc ml-4 mt-1">
+                      <li>Segment your audience by demographics</li>
+                      <li>Create a message to send</li>
+                      <li>Create a poll to gather feedback</li>
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+            {(costs.smsCount > 0 || costs.mmsCount > 0) && (
+              <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Estimated Costs</h3>
+                <div className="space-y-1 text-sm text-gray-600">
+                  {costs.smsCount > 0 && (
+                    <p>SMS Messages: {costs.smsCount} × $0.03 = ${(costs.smsCount * 0.03).toFixed(2)}</p>
+                  )}
+                  {costs.mmsCount > 0 && (
+                    <p>MMS Messages: {costs.mmsCount} × $0.06 = ${(costs.mmsCount * 0.06).toFixed(2)}</p>
+                  )}
+                  <p className="text-gray-900 font-medium pt-1 border-t border-gray-200">
+                    Total: ${costs.total}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </Panel>
         <Panel position="top-right" className="flex gap-2">
           <div className="flex items-center gap-2 bg-white px-3 rounded-lg border border-gray-200 h-10">
