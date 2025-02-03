@@ -5,6 +5,7 @@ import { SmilePlus, Plus, Trash2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PollOption } from "@/types/flow";
+import { useEffect } from "react";
 
 interface PollAnswersProps {
   options: PollOption[];
@@ -25,6 +26,20 @@ export const PollAnswers = ({
   onAddOption,
   onDeleteOption,
 }: PollAnswersProps) => {
+  useEffect(() => {
+    // Update default answers when label type changes
+    const defaultAnswers = options.slice(0, 3).map((option, index) => ({
+      ...option,
+      text: option.text || (labelType === "numerical" ? `${index + 1} =` : `${String.fromCharCode(65 + index)} =`)
+    }));
+    
+    defaultAnswers.forEach(answer => {
+      if (!answer.text) {
+        updateOption(answer.id, answer.text);
+      }
+    });
+  }, [labelType]);
+
   const getOptionLabel = (index: number) => {
     if (labelType === "numerical") {
       return `${index + 1} =`;
