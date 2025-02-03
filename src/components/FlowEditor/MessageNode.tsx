@@ -64,7 +64,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   const [showKeywordModal, setShowKeywordModal] = useState(false);
   const [newKeyword, setNewKeyword] = useState("");
   const [newResponse, setNewResponse] = useState("");
-  const [messageType, setMessageType] = useState<'SMS' | 'MMS'>('SMS');
+  const [messageType, setMessageType] = useState<'SMS' | 'MMS' | 'Toll-Free'>('SMS');
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
 
   const placeholderMedia = [
@@ -86,7 +86,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   ];
 
   useEffect(() => {
-    // URL detection regex
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const detectedLinks = data.content.match(urlRegex) || [];
     setLinks(detectedLinks);
@@ -99,8 +98,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   const handleMediaUpload = () => {
-    // For now, we'll just show a toast. In a real implementation, 
-    // this would open a file picker
     toast({
       title: "Media Upload",
       description: "Media upload functionality will be implemented here",
@@ -120,7 +117,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   const removeMedia = () => {
-    // Remove media tag from content
     const newContent = data.content.replace(/\n\[(Video|Media)\]:.*$/g, '');
     data.onChange(newContent);
     setSelectedMedia(null);
@@ -133,7 +129,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
   };
 
   const enableLinkTracking = (link: string) => {
-    // Replace the regular link with a tracked version
     const trackedLink = `https://track.your-domain.com/?url=${encodeURIComponent(link)}`;
     const newContent = data.content.replace(link, trackedLink);
     data.onChange(newContent);
@@ -179,7 +174,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
           <MessageSquare className="w-4 h-4 text-gray-600" />
           <span className="font-medium text-black">Message</span>
           <Badge variant="secondary" className="text-xs">
-            {messageType}
+            {data.areaCode === "888" ? "Toll-Free" : messageType}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -190,7 +185,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               onChange={(e) => data.onAreaCodeChange?.(e.target.value)}
               className="bg-transparent border-none focus:outline-none text-sm"
             >
-              {AREA_CODES.map((code) => (
+              {[...AREA_CODES, "888"].map((code) => (
                 <option key={code} value={code}>
                   ({code})
                 </option>
@@ -200,14 +195,30 @@ const MessageNode = ({ data }: MessageNodeProps) => {
           <Popover open={showCalendar} onOpenChange={setShowCalendar}>
             <PopoverTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 text-gray-500 hover:text-gray-700"
               >
-                <Calendar className="h-4 w-4" />
+                {selectedDate ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Clock className="h-4 w-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">Scheduled for {format(selectedDate, "PPpp")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Calendar className="h-4 w-4" />
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
+              <div className="p-3 border-b border-gray-100">
+                <h4 className="text-sm font-medium">Schedule Message</h4>
+              </div>
               <CalendarComponent
                 mode="single"
                 selected={selectedDate}
@@ -268,7 +279,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
           </span>
         </div>
 
-        {/* Media Gallery */}
         <div className="grid grid-cols-4 gap-2 my-4">
           {placeholderMedia.map((media, index) => (
             <div
@@ -301,7 +311,6 @@ const MessageNode = ({ data }: MessageNodeProps) => {
               )}
             </div>
           ))}
-          {/* Add Media Button */}
           <div 
             onClick={handleMediaUpload}
             className="relative cursor-pointer group border-2 border-dashed border-gray-300 rounded-md h-20 flex items-center justify-center hover:border-gray-400 transition-colors"
@@ -374,7 +383,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
                   data.onKeywordTriggersChange?.(newTriggers);
                 }}
               >
-                <Trash className="h-4 w-4 text-red-600 hover:text-red-700 hover:bg-red-50" />
+                <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700 hover:bg-red-50" />
               </Button>
             </div>
           ))}
