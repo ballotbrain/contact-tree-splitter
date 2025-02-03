@@ -1,7 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2, CheckSquare, Square } from "lucide-react";
+import { Users, Tag, MessageSquare, ListOrdered, ChevronDown, Split, Trash2, CheckSquare, Square, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 interface Tag {
@@ -128,6 +129,20 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
                   </div>
                 </DropdownMenuCheckboxItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="flex items-center gap-2 py-2 px-3 cursor-pointer"
+                onClick={() => {
+                  // This will be connected to the file upload functionality later
+                  console.log("Upload new audience clicked");
+                }}
+              >
+                <Upload className="h-4 w-4" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Upload New Audience</span>
+                  <span className="text-sm text-gray-500">Import CSV file</span>
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
