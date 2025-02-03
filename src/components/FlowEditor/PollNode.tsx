@@ -29,6 +29,7 @@ const PollNode = ({ data }: PollNodeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.scheduledTime);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [labelType, setLabelType] = useState<"numerical" | "alphabetical">("numerical");
+  const isFirstQuestion = data.questionNumber === 1;
 
   useEffect(() => {
     if (!data.options || data.options.length === 0) {
@@ -82,12 +83,13 @@ const PollNode = ({ data }: PollNodeProps) => {
         <PollHeader
           questionNumber={data.questionNumber || 1}
           areaCode={data.areaCode}
-          onAreaCodeChange={data.onAreaCodeChange}
+          onAreaCodeChange={isFirstQuestion ? data.onAreaCodeChange : undefined}
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
           showCalendar={showCalendar}
           setShowCalendar={setShowCalendar}
           onDelete={data.onDelete}
+          isFirstQuestion={isFirstQuestion}
         />
 
         <PollQuestion

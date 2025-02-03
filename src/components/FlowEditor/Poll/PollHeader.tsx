@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ListOrdered, Calendar, Clock, Trash2 } from "lucide-react";
+import { ListOrdered, Calendar, Clock, Trash2, Phone } from "lucide-react";
 import { format } from "date-fns";
 import {
   Popover,
@@ -24,6 +24,7 @@ interface PollHeaderProps {
   showCalendar: boolean;
   setShowCalendar: (show: boolean) => void;
   onDelete?: () => void;
+  isFirstQuestion?: boolean;
 }
 
 const AREA_CODES = ["415", "628", "510"];
@@ -37,6 +38,7 @@ export const PollHeader = ({
   showCalendar,
   setShowCalendar,
   onDelete,
+  isFirstQuestion,
 }: PollHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-3">
@@ -47,17 +49,24 @@ export const PollHeader = ({
         </Badge>
       </div>
       <div className="flex items-center gap-2">
-        <select
-          value={areaCode}
-          onChange={(e) => onAreaCodeChange?.(e.target.value)}
-          className="text-sm border border-gray-200 rounded px-2 py-1 bg-white text-black"
-        >
-          {AREA_CODES.map((code) => (
-            <option key={code} value={code}>
-              ({code})
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-1 text-sm border border-gray-200 rounded px-2 py-1 bg-white text-black">
+          <Phone className="w-3 h-3 text-gray-500" />
+          {isFirstQuestion ? (
+            <select
+              value={areaCode}
+              onChange={(e) => onAreaCodeChange?.(e.target.value)}
+              className="bg-transparent border-none focus:outline-none text-sm"
+            >
+              {AREA_CODES.map((code) => (
+                <option key={code} value={code}>
+                  ({code})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-gray-500">({areaCode})</span>
+          )}
+        </div>
         <Popover open={showCalendar} onOpenChange={setShowCalendar}>
           <PopoverTrigger asChild>
             <Button
