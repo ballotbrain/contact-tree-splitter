@@ -92,6 +92,12 @@ const Index = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
 
+  const resetFlow = useCallback(() => {
+    setNodes(initialNodes);
+    setEdges([]);
+    setHasSelectedAudience(false);
+  }, [setNodes, setEdges]);
+
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
@@ -153,7 +159,7 @@ const Index = () => {
     }]);
   }, [nodes, setNodes, setEdges, deleteNode]);
 
-  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, parentAudienceName: string) => {
+  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
     const parentNode = nodes.find(n => n.id === nodeId);
     if (!parentNode) return;
 
@@ -167,9 +173,9 @@ const Index = () => {
         y: parentNode.position.y + 250
       },
       data: {
-        label: `${parentAudienceName} - ${tagName}`,
+        label: `${audienceName} - ${tagName}`,
         contacts: segmentSize,
-        parentAudience: parentAudienceName,
+        parentAudience: audienceName,
         segmentCriteria: tagName,
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
@@ -192,7 +198,7 @@ const Index = () => {
         if (node.id === nodeId) {
           const totalContacts = AVAILABLE_AUDIENCES
             .filter(audience => audienceIds.includes(audience.id))
-            .reduce((sum, audience) => sum + audience.contacts, 0);
+            .reduce((sum, audience) => sum + Number(audience.contacts), 0);
           
           setHasSelectedAudience(audienceIds.length > 0);
           
@@ -211,7 +217,7 @@ const Index = () => {
                       ${DEMOGRAPHIC_TAGS.map(tag => `
                         <button 
                           class="w-full text-left px-3 py-2 rounded hover:bg-gray-100"
-                          onclick="handleTagSelect('${nodeId}', '${tag.id}', ${tag.segmentSize}, '${node.data.label}')"
+                          onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${tag.segmentSize}, '${node.data.label}')"
                         >
                           ${tag.name} (${tag.segmentSize.toLocaleString()} contacts)
                         </button>
@@ -505,5 +511,12 @@ const Index = () => {
     </div>
   );
 };
+
+// Add TypeScript declaration for the global handleTagSelect function
+declare global {
+  interface Window {
+    handleTagSelect: (nodeId: string, tagId: string, segmentSize: number, audienceName: string) => void;
+  }
+}
 
 export default Index;
