@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { format } from "date-fns";
-import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Plus } from "lucide-react";
+import { Eye, Send, RefreshCcw, ChevronRight, Info, StopCircle, Plus, Users, Tag, Calendar, MapPin } from "lucide-react";
 import PreviewDialog from "@/components/PreviewDialog";
 
 import AudienceNode from "@/components/FlowEditor/AudienceNode";
@@ -92,6 +92,63 @@ const Index = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
 
+  const getChildNodes = useCallback((nodeId: string): string[] => {
+    const childEdges = edges.filter(edge => edge.source === nodeId);
+    const childIds = childEdges.map(edge => edge.target);
+    const descendantIds: string[] = [];
+    
+    childIds.forEach(childId => {
+      descendantIds.push(childId);
+      descendantIds.push(...getChildNodes(childId));
+    });
+    
+    return descendantIds;
+  }, [edges]);
+
+  const deleteNode = useCallback((nodeId: string) => {
+    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
+    
+    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
+    setEdges(eds => eds.filter(edge => 
+      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
+    ));
+  }, [getChildNodes, setNodes, setEdges]);
+
+  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
+    const parentNode = nodes.find(n => n.id === nodeId);
+    if (!parentNode) return;
+
+    const segmentNode: CustomNode = {
+      id: `segment-${Date.now()}`,
+      type: 'audience',
+      position: {
+        x: parentNode.position.x,
+        y: parentNode.position.y + 250
+      },
+      data: {
+        label: `${audienceName} - ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
+        contacts: segmentSize,
+        parentAudience: audienceName,
+        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name || '',
+        selectedAudiences: parentNode.data.selectedAudiences,
+        selectedTags: [],
+        onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
+        onPollCreate: () => createPollNode(`segment-${Date.now()}`),
+        onSegment: () => {},
+        onDelete: () => deleteNode(`segment-${Date.now()}`),
+        onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
+      },
+    };
+
+    setNodes(nds => [...nds, segmentNode]);
+    setEdges(eds => [...eds, {
+      id: `e-${nodeId}-${segmentNode.id}`,
+      source: nodeId,
+      target: segmentNode.id,
+      type: 'smoothstep',
+    }]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
+
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
     if (!sourceNode) return;
@@ -124,7 +181,7 @@ const Index = () => {
       source: sourceId,
       target: newNode.id,
     }]);
-  }, [nodes, setNodes, setEdges]);
+  }, [nodes, setNodes, setEdges, deleteNode]);
 
   const createPollNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
@@ -178,7 +235,7 @@ const Index = () => {
       target: newNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, selectedAreaCode]);
+  }, [nodes, setNodes, setEdges, deleteNode, selectedAreaCode]);
 
   const handleAudienceChange = useCallback((nodeId: string, audienceIds: string[]) => {
     setNodes(nds =>
@@ -203,23 +260,30 @@ const Index = () => {
                   <div class="w-full">
                     <h2 class="text-xl font-semibold mb-6">Select Demographic Tag</h2>
                     <div class="space-y-3">
-                      ${DEMOGRAPHIC_TAGS.map(tag => `
-                        <button 
-                          class="w-full flex items-center justify-between p-4 text-left rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
-                          onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
-                        >
-                          <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                              <line x1="7" y1="7" x2="7.01" y2="7"/>
-                            </svg>
-                            <span class="font-medium text-gray-900">${tag.name}</span>
-                          </div>
-                          <span class="text-sm text-gray-500">
-                            ${Number(tag.segmentSize).toLocaleString()} contacts
-                          </span>
-                        </button>
-                      `).join('')}
+                      ${DEMOGRAPHIC_TAGS.map(tag => {
+                        let icon;
+                        if (tag.id.startsWith('age')) {
+                          icon = `<svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
+                        } else if (tag.id.startsWith('gender')) {
+                          icon = `<svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                        } else {
+                          icon = `<svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+                        }
+                        return `
+                          <button 
+                            class="w-full flex items-center justify-between p-4 text-left rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
+                            onclick="window.handleTagSelect('${nodeId}', '${tag.id}', ${Number(tag.segmentSize)}, '${node.data.label}')"
+                          >
+                            <div class="flex items-center gap-3">
+                              ${icon}
+                              <span class="font-medium text-gray-900">${tag.name}</span>
+                            </div>
+                            <span class="text-sm text-gray-500">
+                              ${Number(tag.segmentSize).toLocaleString()} contacts
+                            </span>
+                          </button>
+                        `;
+                      }).join('')}
                     </div>
                   </div>
                 `;
@@ -252,42 +316,7 @@ const Index = () => {
         return node;
       })
     );
-  }, [setNodes, createMessageNode, createPollNode, handleTagSelect]);
-
-  const handleTagSelect = useCallback((nodeId: string, tagId: string, segmentSize: number, audienceName: string) => {
-    const parentNode = nodes.find(n => n.id === nodeId);
-    if (!parentNode) return;
-
-    const segmentNode: CustomNode = {
-      id: `segment-${Date.now()}`,
-      type: 'audience',
-      position: {
-        x: parentNode.position.x,
-        y: parentNode.position.y + 250
-      },
-      data: {
-        label: `${audienceName} - ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
-        contacts: segmentSize,
-        parentAudience: audienceName,
-        segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name || '',
-        selectedAudiences: parentNode.data.selectedAudiences,
-        selectedTags: [],
-        onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
-        onPollCreate: () => createPollNode(`segment-${Date.now()}`),
-        onSegment: () => {},
-        onDelete: () => deleteNode(`segment-${Date.now()}`),
-        onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
-      } as AudienceNodeData,
-    };
-
-    setNodes(nds => [...nds, segmentNode]);
-    setEdges(eds => [...eds, {
-      id: `e-${nodeId}-${segmentNode.id}`,
-      source: nodeId,
-      target: segmentNode.id,
-      type: 'smoothstep',
-    }]);
-  }, [nodes, setNodes, setEdges, createMessageNode, createPollNode, handleAudienceChange]);
+  }, [setNodes, createMessageNode, createPollNode, handleTagSelect, deleteNode]);
 
   const resetFlow = useCallback(() => {
     setNodes(initialNodes);
@@ -299,28 +328,6 @@ const Index = () => {
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
-
-  const getChildNodes = useCallback((nodeId: string): string[] => {
-    const childEdges = edges.filter(edge => edge.source === nodeId);
-    const childIds = childEdges.map(edge => edge.target);
-    const descendantIds: string[] = [];
-    
-    childIds.forEach(childId => {
-      descendantIds.push(childId);
-      descendantIds.push(...getChildNodes(childId));
-    });
-    
-    return descendantIds;
-  }, [edges]);
-
-  const deleteNode = useCallback((nodeId: string) => {
-    const nodesToDelete = [nodeId, ...getChildNodes(nodeId)];
-    
-    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
-    setEdges(eds => eds.filter(edge => 
-      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
-    ));
-  }, [getChildNodes, setNodes, setEdges]);
 
   const calculateTotalCost = useCallback(() => {
     const messageNodes = nodes.filter(node => node.type === 'message');
