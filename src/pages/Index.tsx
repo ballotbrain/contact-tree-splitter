@@ -147,7 +147,12 @@ const Index = () => {
       target: segmentNode.id,
       type: 'smoothstep',
     }]);
-  }, [nodes, setNodes, setEdges, deleteNode]);
+
+    toast({
+      title: "Segment Created",
+      description: `Created segment for ${DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name}`,
+    });
+  }, [nodes, setNodes, setEdges, deleteNode, toast]);
 
   const createMessageNode = useCallback((sourceId: string) => {
     const sourceNode = nodes.find(n => n.id === sourceId);
