@@ -101,7 +101,7 @@ const PollNode = ({ data }: PollNodeProps) => {
           <div className="flex items-center gap-2">
             <ListOrdered className="w-4 h-4 text-gray-600" />
             <span className="font-medium text-black">Poll Question {data.questionNumber || 1}</span>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs font-normal bg-neutral-100 text-neutral-800">
               {messageType}
             </Badge>
           </div>

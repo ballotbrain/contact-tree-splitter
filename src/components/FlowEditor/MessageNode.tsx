@@ -173,7 +173,7 @@ const MessageNode = ({ data }: MessageNodeProps) => {
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-gray-600" />
           <span className="font-medium text-black">Message</span>
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs font-normal bg-neutral-100 text-neutral-800">
             {data.areaCode === "888" ? "Toll-Free" : messageType}
           </Badge>
         </div>
