@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Connection, useNodesState, useEdgesState, addEdge } from "@xyflow/react";
-import { CustomNode, CustomEdge } from "@/types/flow";
+import { CustomNode, CustomEdge, AudienceNodeData } from "@/types/flow";
 import { useToast } from "@/hooks/use-toast";
 import { DEMOGRAPHIC_TAGS, AVAILABLE_AUDIENCES } from "@/constants/flowData";
 
@@ -64,14 +64,14 @@ export const useFlowNodes = () => {
         contacts: segmentSize,
         parentAudience: audienceName,
         segmentCriteria: DEMOGRAPHIC_TAGS.find(t => t.id === tagId)?.name || '',
-        selectedAudiences: parentNode.data.selectedAudiences,
+        selectedAudiences: parentNode.data.selectedAudiences as string[],
         selectedTags: [],
         onMessageCreate: () => createMessageNode(`segment-${Date.now()}`),
         onPollCreate: () => createPollNode(`segment-${Date.now()}`),
         onSegment: () => {},
         onDelete: () => deleteNode(`segment-${Date.now()}`),
         onAudienceChange: (audienceIds: string[]) => handleAudienceChange(`segment-${Date.now()}`, audienceIds),
-      },
+      } as AudienceNodeData,
     };
 
     setNodes(nds => [...nds, segmentNode]);

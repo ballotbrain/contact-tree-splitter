@@ -1,3 +1,8 @@
+import AudienceNode from "@/components/FlowEditor/AudienceNode";
+import MessageNode from "@/components/FlowEditor/MessageNode";
+import SequenceNode from "@/components/FlowEditor/SequenceNode";
+import PollNode from "@/components/FlowEditor/PollNode";
+
 export const DEMOGRAPHIC_TAGS = [
   { id: "age_18_24", name: "Age 18-24", segmentSize: 15000 },
   { id: "age_25_34", name: "Age 25-34", segmentSize: 25000 },
