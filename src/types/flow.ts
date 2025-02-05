@@ -5,7 +5,7 @@ export interface Tag {
   name: string;
 }
 
-export interface AudienceNodeData {
+export interface AudienceNodeData extends Record<string, unknown> {
   label: string;
   contacts: number;
   tags?: Tag[];

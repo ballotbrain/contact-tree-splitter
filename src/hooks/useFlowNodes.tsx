@@ -9,7 +9,7 @@ const initialNodes: CustomNode[] = [
     id: "1",
     type: "audience",
     position: { x: 400, y: 100 },
-    data: { 
+    data: {
       label: "HD40 Universe",
       contacts: 100000,
       selectedTags: [],
@@ -17,7 +17,7 @@ const initialNodes: CustomNode[] = [
       onMessageCreate: () => {},
       onPollCreate: () => {},
       onSegment: () => {},
-    },
+    } as AudienceNodeData,
   },
 ];
 
