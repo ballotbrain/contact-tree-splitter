@@ -133,6 +133,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
               <DropdownMenuItem
                 className="flex items-center gap-2 py-2 px-3 cursor-pointer"
                 onClick={() => {
+                  // This will be connected to the file upload functionality later
                   console.log("Upload new audience clicked");
                 }}
               >
@@ -181,7 +182,7 @@ const AudienceNode = ({ data }: AudienceNodeProps) => {
             <span className="w-full border-t border-neutral-200" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-[#e5e5e5] px-2 text-sm text-neutral-500">
+            <span className="bg-white px-2 text-sm text-neutral-500">
               or
             </span>
           </div>
